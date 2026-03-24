@@ -1,22 +1,353 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-br">
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GasFlow | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .glass { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+        }
+        .sidebar-gradient { 
+            background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 100%); 
+        }
+        .menu-active { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-left: 4px solid #10b981; 
+            border-radius: 0.5rem 1.5rem 1.5rem 0.5rem; 
+        }
+        .priority-URGENTE { 
+            border-left: 8px solid #ef4444 !important; 
+        }
+        .priority-PLANEJADO { 
+            border-left: 8px solid #3b82f6 !important; 
+        }
+        .scrollable-content {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #10b981 #e2e8f0;
+        }
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollable-content::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 10px;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        #toast { 
+            transform: translateY(100px); 
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            opacity: 0; 
+        }
+        #toast.show { 
+            transform: translateY(0); 
+            opacity: 1; 
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="overflow-hidden">
 
-<div class="p-10">
-    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] glass px-8 py-4 rounded-2xl shadow-2xl border-l-4 border-emerald-500 flex items-center space-x-4 pointer-events-none">
+        <i class="bi bi-shield-check-fill text-emerald-500 text-xl"></i>
+        <span id="toast-msg" class="text-slate-800 font-bold text-sm">Operação Auditada</span>
+    </div>
 
-    <a href="/pabs" class="bg-green-500 text-white px-4 py-2 rounded">
-        Nova PABS
-    </a>
+    <!-- App Container -->
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 sidebar-gradient text-white flex flex-col p-6 fixed h-full shadow-2xl z-20">
+            <div class="mb-10 px-2">
+                <h2 class="text-2xl font-bold italic">GASFLOW</h2>
+                <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Compliance</p>
+            </div>
+            
+            <nav class="flex-1 space-y-1" id="sidebar-nav">
+                <button id="nav-dashboard" class="w-full flex items-center space-x-3 p-4 transition-all hover:bg-white/5 rounded-lg menu-active">
+                    <i class="bi bi-grid-1x2-fill"></i> 
+                    <span class="text-sm font-bold">Dashboard</span>
+                </button>
+                <button id="nav-pabs" class="w-full flex items-center space-x-3 p-4 hover:bg-white/5 transition-all rounded-lg">
+                    <i class="bi bi-clipboard-plus text-emerald-400"></i> 
+                    <span class="text-sm font-medium">Nova PABS</span>
+                </button>
+                <button id="nav-notifications" class="w-full flex items-center space-x-3 p-4 hover:bg-white/5 transition-all rounded-lg relative">
+                    <i class="bi bi-bell"></i> 
+                    <span class="text-sm font-medium">Notificações</span>
+                    <span id="notif-badge" class="hidden absolute right-4 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                </button>
+            </nav>
+            
+            <div class="mt-auto p-4 bg-white/10 rounded-2xl">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-slate-900 shadow-inner" id="user-initial">
+                        <script>document.write(localStorage.getItem('currentUser')?.charAt(0).toUpperCase() || 'U')</script>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold leading-none truncate" id="user-display">
+                            <script>document.write(localStorage.getItem('currentUser') || 'Usuário')</script>
+                        </p>
+                        <p class="text-[9px] text-emerald-400 mt-1 uppercase" id="user-role-label">Perfil</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full text-[10px] font-bold text-red-400 hover:text-white flex items-center justify-center space-x-2">
+                    <i class="bi bi-power"></i> 
+                    <span>SAIR</span>
+                </button>
+            </div>
+        </aside>
 
-    <a href="/notifications" class="ml-4 text-blue-500">
-        Notificações
-    </a>
-</div>
+        <!-- Main Content -->
+        <main class="flex-1 ml-72 p-8 h-screen overflow-hidden">
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="h-full flex flex-col">
+                <!-- Header -->
+                <header class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <div>
+                        <h1 class="text-4xl font-extrabold text-slate-800">Fila de Trabalho</h1>
+                        <p class="text-slate-500 text-sm mt-1">Gestão inteligente e auditável.</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="toggleFiltroTodos()" id="btn-toggle-view" class="bg-white px-6 py-3 rounded-xl font-bold text-xs text-slate-600 shadow-sm border hover:bg-slate-50 transition-all uppercase">Ver Todos</button>
+                        <button id="btn-pabs-top" onclick="navigateTo('pabs')" class="bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-600 transition-all">+ Nova PABS</button>
+                    </div>
+                </header>
 
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-4 gap-6 mb-6 flex-shrink-0" id="dashboard-bi-counters"></div>
+
+                <!-- Process Table with Scroll -->
+                <div class="glass p-6 rounded-3xl shadow-sm flex-1 min-h-0 flex flex-col">
+                    <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                        <h3 class="font-extrabold text-slate-800 text-xl" id="list-context-title">Minhas Pendências</h3>
+                        <input type="text" id="search-input" oninput="renderDashboard()" placeholder="ID, AFM ou Nome..." class="px-4 py-2 rounded-xl border outline-none text-sm focus:ring-2 focus:ring-emerald-500 bg-white/50 w-80">
+                    </div>
+                    
+                    <!-- Scrollable Table -->
+                    <div id="process-table" class="space-y-3 overflow-y-auto pr-2 flex-1 scrollable-content"></div>
+                </div>
+            </div>
+
+            <!-- PABS View (hidden by default) -->
+            <div id="view-pabs" class="h-full hidden">
+                <h1 class="text-3xl font-bold text-slate-800 mb-6">Protocolar Requisição</h1>
+                <div class="glass p-8 rounded-3xl max-w-4xl shadow-xl border-t-4 border-emerald-500">
+                    <form id="pabs-form" class="space-y-6">
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Objeto da Aquisição</label>
+                                <input type="text" id="form-title" class="w-full px-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Prioridade</label>
+                                <select id="form-priority" class="w-full px-4 py-3 rounded-xl border bg-white outline-none">
+                                    <option value="NORMAL">Normal</option>
+                                    <option value="URGENTE">Urgente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Valor Estimado</label>
+                                <input type="text" id="form-value" oninput="maskMoney(this)" class="w-full px-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="R$ 0,00" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Setor Solicitante</label>
+                                <input type="text" id="form-sector" class="w-full px-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" class="bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-600 transition-all uppercase text-xs tracking-widest">Protocolar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Configurações
+        const FLOW_CONFIG = {
+            PABS: { label: 'PABS Protocolada', next: 'AFM', owner: 'geraf', color: 'emerald', sla: 24 },
+            AFM: { label: 'Autorização Emitida', next: 'TRANSITO', owner: 'geraf', color: 'blue', sla: 48 },
+            TRANSITO: { label: 'Em Trânsito', next: 'GECONT', owner: 'demandante', color: 'blue', sla: 120 },
+            GECONT: { label: 'Validação GECONT', next: 'GESTOR', owner: 'gecont', color: 'indigo', sla: 24 },
+            GESTOR: { label: 'Aprovação Gestor', next: 'PAGO', owner: 'gestor', color: 'purple', sla: 12 },
+            PAGO: { label: 'Pagamento Executado', next: 'FINALIZADO', owner: 'geraf', color: 'emerald', sla: 6 },
+            CORRECAO: { label: 'Aguardando Ajuste', next: 'GECONT', owner: 'demandante', color: 'red', sla: 24 },
+            FINALIZADO: { label: 'Concluído', next: null, owner: null, color: 'slate', sla: 0 }
+        };
+
+        const COLOR_MAP = {
+            emerald: 'bg-emerald-100 text-emerald-700',
+            blue: 'bg-blue-100 text-blue-700',
+            indigo: 'bg-indigo-100 text-indigo-700',
+            purple: 'bg-purple-100 text-purple-700',
+            red: 'bg-red-100 text-red-700',
+            slate: 'bg-slate-100 text-slate-700'
+        };
+
+        // Dados mockados
+        let db = {
+            processes: [
+                { id: 10294, title: 'Tubulação PVC', value: 15450.00, status: 'TRANSITO', priority: 'NORMAL', sector: 'Operações', afm: 'AFM-2026-042', history: [{d: Date.now() - 3600000}] },
+                { id: 10295, title: 'Válvulas Industriais', value: 8900.00, status: 'GECONT', priority: 'URGENTE', sector: 'Manutenção', afm: 'AFM-2026-043', history: [{d: Date.now() - 7200000}] },
+                { id: 10296, title: 'Equipamentos EPI', value: 3500.00, status: 'PABS', priority: 'NORMAL', sector: 'Segurança', afm: null, history: [{d: Date.now() - 1800000}] }
+            ],
+            showAll: false
+        };
+
+        let currentUser = localStorage.getItem('currentUser') || 'usuário';
+
+        // Funções
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        function navigateTo(view) {
+            if (view === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('view-pabs').classList.add('hidden');
+                document.getElementById('nav-dashboard').classList.add('menu-active');
+                document.getElementById('nav-pabs').classList.remove('menu-active');
+            } else {
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-pabs').classList.remove('hidden');
+                document.getElementById('nav-dashboard').classList.remove('menu-active');
+                document.getElementById('nav-pabs').classList.add('menu-active');
+            }
+        }
+
+        function renderDashboard() {
+            const list = document.getElementById('process-table');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            let bi = { pendentes: 0, ativos: 0, valorAtivo: 0, concluidos: 0 };
+
+            db.processes.forEach(p => {
+                if(p.status === 'FINALIZADO') bi.concluidos++; 
+                else { 
+                    bi.ativos++; 
+                    bi.valorAtivo += p.value; 
+                }
+            });
+
+            let filtered = db.processes.filter(p => {
+                const s = FLOW_CONFIG[p.status];
+                const isMine = (s.owner === currentUser);
+                const match = p.title.toLowerCase().includes(search) || p.id.toString().includes(search);
+                if(isMine && match) bi.pendentes++;
+                return db.showAll ? match : (match && isMine);
+            });
+
+            if(filtered.length === 0){
+                list.innerHTML = `<div class="text-center py-12 text-slate-300 italic"><i class="bi bi-inbox text-5xl block mb-4 opacity-20"></i><p>Nenhum processo pendente.</p></div>`;
+            } else {
+                list.innerHTML = filtered.map(p => {
+                    const s = FLOW_CONFIG[p.status];
+                    const diffH = Math.floor((Date.now() - p.history[p.history.length-1].d) / 3600000);
+                    return `<div class="flex items-center justify-between p-4 bg-white border rounded-2xl hover:border-emerald-300 cursor-pointer shadow-sm group priority-${p.priority}">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                <i class="bi bi-file-earmark-text text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm">#${p.id} - ${p.title}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">${p.sector}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold ${diffH > s.sla ? 'text-red-500' : 'text-slate-400'} mb-1">${diffH}h</p>
+                            <span class="${COLOR_MAP[s.color]} text-[9px] px-3 py-1 rounded-full font-black uppercase">${s.label}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            
+            renderBICounters(bi);
+        }
+
+        function renderBICounters(bi) {
+            const ticket = bi.ativos > 0 ? (bi.valorAtivo / bi.ativos) : 0;
+            document.getElementById('dashboard-bi-counters').innerHTML = `
+                <div class="glass p-4 rounded-2xl border-b-4 border-emerald-500 text-center stat-card">
+                    <span class="text-2xl font-black text-emerald-600">${bi.pendentes}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">Suas Pendências</p>
+                </div>
+                <div class="glass p-4 rounded-2xl border-b-4 border-blue-500 text-center stat-card">
+                    <span class="text-lg font-black text-blue-600">${ticket.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-1">Ticket Médio</p>
+                </div>
+                <div class="glass p-4 rounded-2xl border-b-4 border-purple-500 text-center stat-card">
+                    <span class="text-lg font-black text-purple-600">${bi.valorAtivo.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-1">Volume Ativo</p>
+                </div>
+                <div class="glass p-4 rounded-2xl border-b-4 border-slate-700 text-center stat-card">
+                    <span class="text-2xl font-black text-slate-700">${bi.concluidos}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">Concluídos</p>
+                </div>
+            `;
+        }
+
+        function toggleFiltroTodos() {
+            db.showAll = !db.showAll;
+            renderDashboard();
+        }
+
+        function maskMoney(input) {
+            let v = input.value.replace(/\D/g, '');
+            if(!v) { 
+                input.value = ""; 
+                return; 
+            }
+            const n = Number(v)/100;
+            input.value = n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('nav-dashboard').addEventListener('click', () => navigateTo('dashboard'));
+        document.getElementById('nav-pabs').addEventListener('click', () => navigateTo('pabs'));
+        
+        document.getElementById('pabs-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showToast('PABS protocolada com sucesso!');
+            navigateTo('dashboard');
+            this.reset();
+        });
+
+        // Inicialização
+        renderDashboard();
+    </script>
 </body>
 </html>

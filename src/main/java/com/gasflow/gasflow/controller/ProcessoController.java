@@ -1,7 +1,9 @@
 package com.gasflow.gasflow.controller;
 
 import com.gasflow.gasflow.model.Processo;
+import com.gasflow.gasflow.model.Usuario;
 import com.gasflow.gasflow.service.ProcessoService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,27 +18,44 @@ public class ProcessoController {
         this.processoService = processoService;
     }
 
+    @GetMapping
+    public String listarProcessos(Model model, HttpSession session) {
+        if (session.getAttribute("usuarioLogado") == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("processos", processoService.listarTodos());
+        return "dashboard";
+    }
+
     @GetMapping("/novo")
-    public String abrirFormulario(Model model) {
+    public String abrirFormulario(Model model, HttpSession session) {
+        if (session.getAttribute("usuarioLogado") == null) {
+            return "redirect:/";
+        }
+
         model.addAttribute("processo", new Processo());
         return "pabs";
     }
 
     @PostMapping("/salvar")
-    public String salvarProcesso(@ModelAttribute Processo processo) {
-        Long usuarioFixoId = 1L;
-        processoService.criarProcesso(processo, usuarioFixoId);
+    public String salvarProcesso(@ModelAttribute Processo processo, HttpSession session) {
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            return "redirect:/";
+        }
+
+        processoService.criarProcesso(processo, usuarioLogado.getId());
         return "redirect:/processos";
     }
 
-    @GetMapping
-    public String listarProcessos(Model model) {
-        model.addAttribute("processos", processoService.listarTodos());
-        return "dashboard";
-    }
-
     @GetMapping("/{id}")
-    public String detalharProcesso(@PathVariable Long id, Model model) {
+    public String detalharProcesso(@PathVariable Long id, Model model, HttpSession session) {
+        if (session.getAttribute("usuarioLogado") == null) {
+            return "redirect:/";
+        }
+
         model.addAttribute("processo", processoService.buscarPorId(id));
         return "process-detail";
     }

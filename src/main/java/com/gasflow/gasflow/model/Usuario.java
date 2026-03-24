@@ -18,7 +18,13 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private String login;
+
+    @Column(nullable = false, length = 255)
+    private String senha;
+
     @ManyToOne
     @JoinColumn(name = "setor_id", nullable = false)
-    private Setor setor;
+    private Setor setor;    
 }
