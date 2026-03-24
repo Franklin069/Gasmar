@@ -1,0 +1,14 @@
+package com.gasflow.gasflow.enums;
+
+public enum StatusProcesso {
+    ABERTO,
+    AGUARDANDO_ANALISE_GERAF,
+    AUTORIZACAO_EMITIDA,
+    AGUARDANDO_PAGAMENTO,
+    PAGO,
+    AGUARDANDO_RECEBIMENTO,
+    RECEBIDO_CONFORME,
+    RECEBIDO_NAO_CONFORME,
+    NF_VALIDADA,
+    ENCERRADO
+}
