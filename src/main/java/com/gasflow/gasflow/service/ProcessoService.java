@@ -26,7 +26,7 @@ public class ProcessoService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         processo.setIdentificador(gerarIdentificador());
-        processo.setEstadoAtual(StatusProcesso.AGUARDANDO_ANALISE_GERAF);
+        processo.setEstadoAtual(StatusProcesso.AGUARDANDO_ANALISE);
         processo.setSetorDemandante(usuario);
 
         return processoRepository.save(processo);
