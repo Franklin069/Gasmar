@@ -2,6 +2,7 @@ package com.gasflow.gasflow.controller;
 
 import com.gasflow.gasflow.model.Processo;
 import com.gasflow.gasflow.model.Usuario;
+import com.gasflow.gasflow.repository.HistoricoProcessoRepository;
 import com.gasflow.gasflow.service.ProcessoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class ProcessoController {
 
     private final ProcessoService processoService;
+    private final HistoricoProcessoRepository historicoRepository;
 
-    public ProcessoController(ProcessoService processoService) {
+    public ProcessoController(ProcessoService processoService,
+                              HistoricoProcessoRepository historicoRepository) {
         this.processoService = processoService;
+        this.historicoRepository = historicoRepository;
     }
 
     @GetMapping
@@ -56,7 +60,13 @@ public class ProcessoController {
             return "redirect:/";
         }
 
-        model.addAttribute("processo", processoService.buscarPorId(id));
+        Processo processo = processoService.buscarPorId(id);
+
+        model.addAttribute("processo", processo);
+        model.addAttribute("historicos",
+                historicoRepository.findByProcessoId(id)
+        );
+
         return "process-detail";
     }
 }
