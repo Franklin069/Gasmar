@@ -3,6 +3,7 @@ package com.gasflow.gasflow.controller;
 import com.gasflow.gasflow.model.Usuario;
 import com.gasflow.gasflow.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AuthController {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UsuarioRepository usuarioRepository) {
+    public AuthController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/")
@@ -32,14 +35,22 @@ public class AuthController {
                              HttpSession session,
                              Model model) {
 
-        var usuarioOpt = usuarioRepository.findByLogin(login);
+        String loginLimpo = login.replaceAll("\\D", "");
 
-        if (usuarioOpt.isEmpty() || !usuarioOpt.get().getSenha().equals(senha)) {
+        var usuarioOpt = usuarioRepository.findByLogin(loginLimpo);
+
+        if (usuarioOpt.isEmpty()) {
             model.addAttribute("erro", "Login ou senha inválidos");
             return "login";
         }
 
         Usuario usuario = usuarioOpt.get();
+
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+            model.addAttribute("erro", "Login ou senha inválidos");
+            return "login";
+        }
+
         session.setAttribute("usuarioLogado", usuario);
 
         return "redirect:/processos";

@@ -1,16 +1,186 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Detalhe do Processo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GasFlow | Detalhe do Processo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #eef2f6;
+        }
+
+        .card-soft {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+    </style>
 </head>
-<body class="p-10 bg-gray-100">
+<body class="min-h-screen p-8">
 
-<h1 class="text-2xl font-bold">Detalhe do Processo</h1>
+<div class="max-w-5xl mx-auto">
 
-<p class="mt-4">Aqui vai os dados do processo...</p>
+    <!-- TOPO -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-800">Detalhe do Processo</h1>
+            <p class="text-sm text-slate-500">Visualização completa do fluxo do processo</p>
+        </div>
 
-<a href="/dashboard" class="text-blue-500 mt-6 block">Voltar</a>
+        <a th:href="@{/processos}"
+           class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-3 rounded-xl">
+            Voltar
+        </a>
+    </div>
+
+    <!-- CARD PRINCIPAL -->
+    <section class="card-soft p-8 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Identificador</p>
+                <p class="text-lg font-bold text-slate-800" th:text="${processo.identificador}">PROC-0001</p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Status Atual</p>
+                <p class="text-lg font-bold text-emerald-600" th:text="${processo.estadoAtual}">AGUARDANDO_ANALISE_GERAF</p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Título</p>
+                <p class="text-lg font-semibold text-slate-800" th:text="${processo.titulo}">Compra de materiais</p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Valor Total</p>
+                <p class="text-lg font-semibold text-slate-800"
+                   th:text="${#numbers.formatDecimal(processo.valorTotal,1,'POINT',2,'COMMA')}">
+                    0,00
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Processo</p>
+                <p class="text-lg font-semibold text-slate-800" th:text="${processo.tipoProcesso}">COMPRA_BEM</p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Aquisição</p>
+                <p class="text-lg font-semibold text-slate-800" th:text="${processo.tipoAquisicao}">CPV</p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Demandante</p>
+                <p class="text-lg font-semibold text-slate-800"
+                   th:text="${processo.setorDemandante != null ? processo.setorDemandante.nome : 'Não informado'}">
+                    Usuário
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Fiscal</p>
+                <p class="text-lg font-semibold text-slate-800"
+                   th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Não definido'}">
+                    Não definido
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- AÇÕES DO FLUXO -->
+    <section class="card-soft p-8">
+        <h2 class="text-xl font-extrabold text-slate-800 mb-6">Ações Disponíveis</h2>
+
+        <div class="flex flex-wrap gap-4">
+
+            <!-- GERAF AUTORIZA COMPRA -->
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF 
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
+                  th:action="@{/processos/{id}/autorizar(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Autorizar Compra
+                </button>
+            </form>
+
+            <!-- GESTOR APROVA PAGAMENTO -->
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR 
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA}"
+                  th:action="@{/processos/{id}/aprovar-pagamento(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Aprovar Pagamento
+                </button>
+            </form>
+
+            <!-- REGISTRAR PAGAMENTO -->
+            <form th:if="${processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO}"
+                  th:action="@{/processos/{id}/registrar-pagamento(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Registrar Pagamento
+                </button>
+            </form>
+
+            <!-- DEMANDANTE REGISTRA RECEBIMENTO -->
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
+                  th:action="@{/processos/{id}/receber-conforme(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Receber Conforme
+                </button>
+            </form>
+
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
+                  th:action="@{/processos/{id}/receber-nao-conforme(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-red-500 hover:bg-red-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Receber Não Conforme
+                </button>
+            </form>
+
+            <!-- GECONT VALIDA NF -->
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT 
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME}"
+                  th:action="@{/processos/{id}/validar-nf(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Validar Nota Fiscal
+                </button>
+            </form>
+
+        </div>
+
+        <!-- MENSAGEM CASO NÃO HAJA AÇÃO -->
+        <div th:if="${(usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF 
+                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF)
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR 
+                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA)
+                     and (processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO)
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).PAGO)
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT 
+                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME)}"
+             class="mt-6 text-slate-400 text-sm">
+            Nenhuma ação disponível para este perfil no estado atual do processo.
+        </div>
+
+    </section>
+
+</div>
 
 </body>
 </html>

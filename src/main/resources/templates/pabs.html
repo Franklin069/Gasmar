@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GasFlow | Nova Requisição</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -86,7 +88,7 @@
             <div>
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Dados</p>
 
-                <a href="#"
+                <a th:href="@{/processos}"
                    class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full hover:bg-white/10">
                     <span class="text-sm">◫</span>
                     <span>Todos os Processos</span>
@@ -97,17 +99,11 @@
         <div class="bg-white/10 rounded-2xl p-3">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold">
-                    <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">L</span>
+                    <span th:text="${#strings.substring(usuarioLogado.nome,0,1)}">U</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-[10px] font-semibold truncate"
-                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">
-                        Lauro Silva
-                    </p>
-                    <p class="text-[8px] text-emerald-300 truncate"
-                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">
-                        Demandante
-                    </p>
+                    <p class="text-[10px] font-semibold truncate" th:text="${usuarioLogado.nome}">Usuário</p>
+                    <p class="text-[8px] text-emerald-300 truncate" th:text="${usuarioLogado.perfil}">PERFIL</p>
                 </div>
             </div>
 
@@ -122,75 +118,85 @@
     <main class="flex-1 px-8 py-5">
         <h2 class="text-[22px] font-extrabold text-slate-800 mb-6">Nova Requisição (PABS)</h2>
 
-        <section class="form-shell max-w-[510px] p-6">
-            <form th:action="@{/processos/salvar}" method="post" th:object="${processo}">
-                <div class="grid grid-cols-2 gap-5 mb-5">
+        <section class="form-shell max-w-[680px] p-6">
+            <form th:action="@{/processos/salvar}" method="post" th:object="${processo}" class="space-y-5">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-700 mb-2">Título da Demanda</label>
                         <input type="text"
                                th:field="*{titulo}"
                                class="input-soft w-full"
-                               placeholder="Ex: Válvulas"
+                               placeholder="Ex: Aquisição de válvulas"
                                required>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Prioridade</label>
-                        <select class="input-soft w-full">
-                            <option>Normal</option>
-                            <option>Urgente</option>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Tipo de Processo</label>
+                        <select th:field="*{tipoProcesso}" class="input-soft w-full" required>
+                            <option value="">Selecione</option>
+                            <option value="COMPRA_BEM">Compra de Bem</option>
+                            <option value="CONTRATACAO_SERVICO">Contratação de Serviço</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="mb-5">
-                    <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor Total</label>
-                    <input type="number"
-                           step="0.01"
-                           th:field="*{valorTotal}"
-                           class="input-soft w-full"
-                           placeholder="Ex: 1500.00"
-                           required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor Total</label>
+                        <input type="number"
+                               step="0.01"
+                               th:field="*{valorTotal}"
+                               class="input-soft w-full"
+                               placeholder="Ex: 1500.00"
+                               required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Tipo de Aquisição</label>
+                        <select th:field="*{tipoAquisicao}" class="input-soft w-full" required>
+                            <option value="">Selecione</option>
+                            <option value="CPV">CPV</option>
+                            <option value="CONTRATO">Contrato</option>
+                        </select>
+                    </div>
                 </div>
 
-                <input type="hidden" th:field="*{tipoProcesso}" value="COMPRA_BEM">
-                <input type="hidden" th:field="*{tipoAquisicao}" value="CPV">
-
-                <div class="grid grid-cols-2 gap-5 mb-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="upload-box flex flex-col items-center justify-center text-center px-4 py-6">
                         <div class="text-emerald-500 text-2xl mb-2">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">Memorial Descritivo</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
+                        <input type="file" class="mt-3 text-xs">
                     </div>
 
                     <div class="upload-box flex flex-col items-center justify-center text-center px-4 py-6">
                         <div class="text-emerald-500 text-2xl mb-2">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">PABS (Obrigatório)</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
+                        <input type="file" class="mt-3 text-xs" required>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
                         <div class="text-emerald-500 text-xl mb-2">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">Mapa de Cotação</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
+                        <input type="file" class="mt-3 text-xs">
                     </div>
 
                     <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
                         <div class="text-emerald-500 text-xl mb-2">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">Propostas</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
+                        <input type="file" class="mt-3 text-xs">
                     </div>
 
                     <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
                         <div class="text-emerald-500 text-xl mb-2">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">Outros</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
+                        <input type="file" class="mt-3 text-xs">
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3">
+                <div class="flex justify-end gap-3 pt-3">
                     <a th:href="@{/processos}"
                        class="bg-gray-300 text-slate-800 px-8 py-3 rounded-xl font-bold text-sm">
                         Cancelar

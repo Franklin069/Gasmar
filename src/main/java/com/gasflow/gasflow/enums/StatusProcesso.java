@@ -1,6 +1,7 @@
 package com.gasflow.gasflow.enums;
 
 public enum StatusProcesso {
+
     ABERTO,
     AGUARDANDO_ANALISE_GERAF,
     AUTORIZACAO_EMITIDA,
@@ -9,6 +10,7 @@ public enum StatusProcesso {
     AGUARDANDO_RECEBIMENTO,
     RECEBIDO_CONFORME,
     RECEBIDO_NAO_CONFORME,
-    NF_VALIDADA,
+    NOTA_FISCAL_VALIDADA,
     ENCERRADO
+
 }

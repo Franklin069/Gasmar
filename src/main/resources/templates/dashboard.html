@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GasFlow | Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -36,6 +38,14 @@
         .process-row:hover {
             background: #f1f5f9;
         }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 12px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -45,9 +55,10 @@
     <!-- SIDEBAR -->
     <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5">
         <div>
+
             <div class="mb-10 px-1">
-                <h1 class="text-2xl font-extrabold tracking-tight leading-none">GASFLOW</h1>
-                <p class="text-[9px] text-emerald-400 font-bold tracking-[0.25em] mt-1 uppercase">
+                <h1 class="text-2xl font-extrabold">GASFLOW</h1>
+                <p class="text-[9px] text-emerald-400 font-bold uppercase tracking-[0.25em]">
                     Inteligência de Compras
                 </p>
             </div>
@@ -57,7 +68,7 @@
 
                 <a th:href="@{/processos}"
                    class="menu-active flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2">
-                    <span class="text-sm">◧</span>
+                    <span>◧</span>
                     <span>Dashboard</span>
                 </a>
             </div>
@@ -65,9 +76,10 @@
             <div class="mb-5">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
 
-                <a th:href="@{/processos/novo}"
+                <a th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE}"
+                   th:href="@{/processos/novo}"
                    class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10">
-                    <span class="text-sm">◫</span>
+                    <span>◫</span>
                     <span>Requisições</span>
                 </a>
             </div>
@@ -77,26 +89,22 @@
 
                 <a th:href="@{/processos}"
                    class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full hover:bg-white/10">
-                    <span class="text-sm">◫</span>
+                    <span>◫</span>
                     <span>Todos os Processos</span>
                 </a>
             </div>
+
         </div>
 
         <div class="bg-white/10 rounded-2xl p-3">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold">
-                    <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">U</span>
+                    <span th:text="${#strings.substring(usuarioLogado.nome,0,1)}">U</span>
                 </div>
+
                 <div class="min-w-0">
-                    <p class="text-[10px] font-semibold truncate"
-                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">
-                        Usuário
-                    </p>
-                    <p class="text-[8px] text-emerald-300 truncate"
-                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">
-                        Perfil
-                    </p>
+                    <p class="text-[10px] font-semibold truncate" th:text="${usuarioLogado.nome}">Usuário</p>
+                    <p class="text-[8px] text-emerald-300 truncate" th:text="${usuarioLogado.perfil}">PERFIL</p>
                 </div>
             </div>
 
@@ -109,100 +117,103 @@
 
     <!-- CONTEÚDO -->
     <main class="flex-1 px-7 py-5">
+
         <div class="flex items-start justify-between mb-8">
             <div>
                 <h2 class="text-[22px] font-extrabold text-slate-800">Monitor de Estados</h2>
-                <p class="text-[11px] text-slate-400 font-medium">Acompanhamento centralizado.</p>
+                <p class="text-[11px] text-slate-400">Acompanhamento centralizado.</p>
             </div>
 
-            <a th:href="@{/processos/novo}"
+            <a th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE}"
+               th:href="@{/processos/novo}"
                class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-bold px-8 py-4 rounded-2xl shadow-lg">
                 + Nova PABS
             </a>
         </div>
 
-        <!-- CARDS SEM DADOS FICTÍCIOS -->
+        <!-- CARDS -->
         <div class="grid grid-cols-1 xl:grid-cols-4 gap-5 mb-8">
-            <div class="card-soft border border-emerald-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-emerald-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Aguardando Compra
-                </div>
+            <div class="card-soft p-6 text-center">
+                <div class="text-lg font-extrabold text-slate-700"
+                     th:text="${#lists.size(processos)}">0</div>
+                <span class="text-[11px] text-slate-500 font-semibold">Total de Processos</span>
             </div>
 
-            <div class="card-soft border border-blue-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-blue-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Em Trânsito
-                </div>
+            <div class="card-soft p-6 text-center">
+                <div class="text-lg font-extrabold text-slate-700">--</div>
+                <span class="text-[11px] text-slate-500 font-semibold">Aguardando Compra</span>
             </div>
 
-            <div class="card-soft border border-amber-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-amber-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Validar Nota
-                </div>
+            <div class="card-soft p-6 text-center">
+                <div class="text-lg font-extrabold text-slate-700">--</div>
+                <span class="text-[11px] text-slate-500 font-semibold">Aguardando Recebimento</span>
             </div>
 
-            <div class="card-soft border-l-4 border-emerald-500 p-6 min-h-[96px]">
-                <div class="flex justify-between items-start mb-5">
-                    <p class="text-[9px] font-extrabold tracking-[0.2em] uppercase text-slate-700">
-                        Avisos Rápidos
-                    </p>
-                    <span class="bg-emerald-500 text-white text-[8px] font-bold rounded-full px-2 py-1">
-                        --
-                    </span>
-                </div>
-
-                <div class="bg-emerald-50 rounded-2xl text-center py-4 text-[9px] font-bold text-emerald-700">
-                    Ver Painel Completo
-                </div>
+            <div class="card-soft p-6 text-center">
+                <div class="text-lg font-extrabold text-slate-700">--</div>
+                <span class="text-[11px] text-slate-500 font-semibold">Aguardando Pagamento</span>
             </div>
         </div>
 
-        <!-- LISTA REAL VINDO DO BACKEND -->
-        <section class="panel-soft p-6 min-h-[250px]">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-[24px] xl:text-[18px] font-extrabold text-slate-800">Processos em Foco</h3>
-                <a th:href="@{/processos}" class="text-[10px] font-bold text-emerald-600">Ver Todos</a>
+        <!-- LISTA -->
+        <section class="panel-soft p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-extrabold">Processos</h3>
+                <span class="text-xs text-slate-400 font-semibold">Clique em um processo para ver os detalhes</span>
             </div>
 
-            <div th:if="${#lists.isEmpty(processos)}"
-                 class="h-[150px] flex items-center justify-center text-slate-400 text-sm">
-                Nenhum processo cadastrado ainda.
+            <div th:if="${#lists.isEmpty(processos)}" class="text-center text-gray-400 py-10">
+                Nenhum processo cadastrado
             </div>
 
-            <div th:if="${!#lists.isEmpty(processos)}" class="space-y-3">
-                <a th:each="p : ${processos}"
-                   th:href="@{/processos/{id}(id=${p.id})}"
-                   class="process-row block bg-white rounded-2xl px-5 py-4 border border-slate-100 transition">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <p class="text-sm font-extrabold text-slate-800" th:text="${p.titulo}">Título</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
-                                <span th:text="${p.identificador}">PROC-001</span>
-                                •
-                                <span th:text="${p.setorDemandante != null ? p.setorDemandante.nome : 'Sem setor'}">
-                                    Área Demandante
-                                </span>
-                            </p>
-                        </div>
+            <a th:each="p : ${processos}"
+               th:href="@{/processos/{id}(id=${p.id})}"
+               class="block process-row p-4 bg-white mb-3 rounded-xl transition">
 
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-slate-700"
-                               th:text="${#numbers.formatDecimal(p.valorTotal,1,'POINT',2,'COMMA')}">
-                                0,00
-                            </p>
-                            <p class="text-[10px] uppercase font-black text-emerald-600"
-                               th:text="${p.estadoAtual}">
-                                AGUARDANDO
-                            </p>
+                <div class="flex justify-between items-center gap-4">
+
+                    <div>
+                        <p class="font-bold text-slate-800" th:text="${p.titulo}">Título</p>
+
+                        <div class="text-xs text-gray-400 flex flex-wrap gap-2 mt-1">
+                            <span th:text="${p.identificador}">PROC-0001</span>
+                            <span>•</span>
+                            <span th:text="${p.tipoProcesso}">COMPRA_BEM</span>
+                            <span th:if="${p.tipoAquisicao != null}">•</span>
+                            <span th:if="${p.tipoAquisicao != null}" th:text="${p.tipoAquisicao}">CPV</span>
                         </div>
                     </div>
-                </a>
-            </div>
+
+                    <div class="text-right">
+                        <div class="mb-1">
+                            <span class="status-pill"
+                                  th:classappend="
+                                    ${p.estadoAtual.name() == 'AGUARDANDO_ANALISE_GERAF'} ? ' bg-yellow-100 text-yellow-700' :
+                                    (${p.estadoAtual.name() == 'AUTORIZACAO_EMITIDA'} ? ' bg-blue-100 text-blue-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_PAGAMENTO'} ? ' bg-purple-100 text-purple-700' :
+                                    (${p.estadoAtual.name() == 'PAGO'} ? ' bg-emerald-100 text-emerald-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_RECEBIMENTO'} ? ' bg-cyan-100 text-cyan-700' :
+                                    (${p.estadoAtual.name() == 'RECEBIDO_CONFORME'} ? ' bg-green-100 text-green-700' :
+                                    (${p.estadoAtual.name() == 'RECEBIDO_NAO_CONFORME'} ? ' bg-red-100 text-red-700' :
+                                    (${p.estadoAtual.name() == 'NOTA_FISCAL_VALIDADA'} ? ' bg-indigo-100 text-indigo-700' :
+                                    ' bg-gray-100 text-gray-700')))))))"
+                                  th:text="${p.estadoAtual}">
+                                STATUS
+                            </span>
+                        </div>
+
+                        <div class="text-sm font-semibold text-slate-700"
+                             th:text="${#numbers.formatDecimal(p.valorTotal,1,'POINT',2,'COMMA')}">
+                            0,00
+                        </div>
+                    </div>
+
+                </div>
+            </a>
         </section>
+
     </main>
+
 </div>
 
 </body>
