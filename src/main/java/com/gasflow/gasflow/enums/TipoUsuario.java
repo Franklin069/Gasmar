@@ -4,5 +4,6 @@ public enum TipoUsuario {
     DEMANDANTE,
     GERAF,
     GECONT,
-    GESTOR
+    GESTOR,
+    ADMIN
 }
