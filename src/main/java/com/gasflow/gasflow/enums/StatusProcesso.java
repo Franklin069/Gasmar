@@ -5,6 +5,7 @@ public enum StatusProcesso {
     AGUARDANDO_RECEBIMENTO_EXECUCAO,
     AGUARDANDO_SOLICITACAO_PAGAMENTO,
     AGUARDANDO_AUTORIZACAO_PAGAMENTO,
+    AGUARDANDO_EFETUACAO_PAGAMENTO,
     AGUARDANDO_VALIDACAO_MATERIAL,
     ENCERRADO,
     RECEBIDO_NAO_CONFORME,
@@ -17,6 +18,7 @@ public enum StatusProcesso {
             case AGUARDANDO_RECEBIMENTO_EXECUCAO -> "Aguardando recebimento/execução";
             case AGUARDANDO_SOLICITACAO_PAGAMENTO -> "Aguardando solicitação de pagamento";
             case AGUARDANDO_AUTORIZACAO_PAGAMENTO -> "Aguardando autorização de pagamento";
+            case AGUARDANDO_EFETUACAO_PAGAMENTO -> "Aguardando efetuação de pagamento";
             case AGUARDANDO_VALIDACAO_MATERIAL -> "Aguardando validação do material";
             case ENCERRADO -> "Encerrado";
             case RECEBIDO_NAO_CONFORME -> "Recebido não conforme";
@@ -31,6 +33,7 @@ public enum StatusProcesso {
             case AGUARDANDO_RECEBIMENTO_EXECUCAO -> "Contratação Realizada";
             case AGUARDANDO_SOLICITACAO_PAGAMENTO -> "Pronto para Pagamento";
             case AGUARDANDO_AUTORIZACAO_PAGAMENTO -> "Pagamento Solicitado";
+            case AGUARDANDO_EFETUACAO_PAGAMENTO -> "Pagamento Autorizado";
             case AGUARDANDO_VALIDACAO_MATERIAL -> "Material Entregue";
             case ENCERRADO -> "Processo Finalizado";
             case RECEBIDO_NAO_CONFORME -> "Material Inconforme";

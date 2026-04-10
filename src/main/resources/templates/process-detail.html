@@ -6,7 +6,8 @@
     <title th:text="'GasFlow | ' + ${processo.titulo}">GasFlow | Detalhes do Processo</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
@@ -21,33 +22,41 @@
 
         .card-soft {
             background: #ffffff;
-            border-radius: 12px; /* Borda um pouco mais suave como na sua imagem */
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.03);
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.03);
             border: 1px solid #e2e8f0;
         }
 
         .panel-soft {
             background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
         }
 
-        /* Bordas dos 5 cards baseados no print */
-        .border-card-1 { border-color: #334155; border-width: 1px; } /* Dark Slate */
-        .border-card-2 { border-color: #64748b; border-width: 1px; } /* Slate */
-        .border-card-3 { border-color: #3b82f6; border-width: 1px; } /* Blue */
-        .border-card-4 { border-color: #10b981; border-width: 1px; } /* Green */
-        .border-card-5 { border-color: #f59e0b; border-width: 1px; } /* Yellow */
+        .border-card-1 { border-color: #334155; border-width: 1px; }
 
         .menu-active {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             border-radius: 999px;
+        }
+
+        /* Barra de rolagem customizada */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
         }
     </style>
 </head>
-<body class="min-h-screen">
-
-<div class="flex min-h-screen">
+<body class="min-h-screen overflow-hidden"> <div class="flex min-h-screen">
 
     <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5 fixed h-full z-20">
         <div>
@@ -60,7 +69,8 @@
 
             <div class="mb-5">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Principal</p>
-                <a th:href="@{/dashboard}" class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition">
+                <a th:href="@{/dashboard}"
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition">
                     <span class="text-sm">◧</span>
                     <span>Dashboard</span>
                 </a>
@@ -68,7 +78,8 @@
 
             <div class="mb-5">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
-                <a th:href="@{/processos/novo}" class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition">
+                <a th:href="@{/processos/novo}"
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition">
                     <span class="text-sm">◫</span>
                     <span>Requisições</span>
                 </a>
@@ -76,7 +87,8 @@
 
             <div>
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Dados</p>
-                <a th:href="@{/processos}" class="menu-active flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full">
+                <a th:href="@{/processos}"
+                   class="menu-active flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full">
                     <span class="text-sm">◫</span>
                     <span>Todos os Processos</span>
                 </a>
@@ -89,125 +101,263 @@
                     <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">U</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-[10px] font-semibold truncate text-white" th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">Usuário</p>
-                    <p class="text-[8px] text-emerald-300 truncate" th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">Perfil</p>
+                    <p class="text-[10px] font-semibold truncate text-white"
+                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">Usuário</p>
+                    <p class="text-[8px] text-emerald-300 truncate"
+                       th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">
+                        Perfil</p>
                 </div>
             </div>
-            <a th:href="@{/logout}" class="text-[8px] uppercase text-red-300 hover:text-red-400 font-bold tracking-wide transition">Encerrar sessão</a>
+            <a th:href="@{/logout}"
+               class="text-[8px] uppercase text-red-300 hover:text-red-400 font-bold tracking-wide transition">Encerrar
+                sessão</a>
         </div>
     </aside>
 
-    <main class="flex-1 ml-[240px] px-8 py-8 lg:px-12 overflow-y-auto">
-        <div class="max-w-7xl mx-auto space-y-8">
+    <main class="flex-1 ml-[240px] px-6 py-6 lg:px-10 h-screen overflow-y-auto">
+        <div class="max-w-6xl mx-auto space-y-6 h-full flex flex-col">
 
-            <header class="flex items-center space-x-4">
-                <button onclick="history.back()" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-sm transition-all">
-                    <i class="bi bi-arrow-left text-lg"></i>
+            <header class="flex items-center space-x-3 shrink-0">
+                <button onclick="history.back()"
+                        class="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-sm transition-all">
+                    <i class="bi bi-arrow-left text-base"></i>
                 </button>
-                <h1 class="text-[22px] font-extrabold text-slate-800 tracking-tight" th:text="${processo.titulo}">
+                <h1 class="text-[18px] font-extrabold text-slate-800 tracking-tight" th:text="${processo.titulo}">
                     Manutenção Hidráulica Sede
                 </h1>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-3">
-
-                <div class="card-soft border-card-1 p-4 flex flex-col justify-center">
-                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wide mb-1">Modalidade do Processo</p>
-                    <p class="text-xs font-bold text-slate-800" th:text="${processo.tipoProcesso.descricao}">
-                        Contrato
-                    </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-2.5 shrink-0">
+                <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
+                    <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Modalidade do
+                        Processo</p>
+                    <p class="text-[10px] font-bold text-slate-800" th:text="${processo.tipoProcesso.descricao}"></p>
                 </div>
 
-                <div class="card-soft border-card-2 p-4 flex flex-col justify-center">
-                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wide mb-1">Natureza da Aquisição</p>
-                    <p class="text-xs font-bold text-slate-800" th:text="${processo.tipoAquisicao != null ? processo.tipoAquisicao : '-'}">
-                        Contratação de Serviço
-                    </p>
+                <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
+                    <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Natureza da
+                        Aquisição</p>
+                    <p class="text-[10px] font-bold text-slate-800"
+                       th:text="${processo.tipoAquisicao != null ? processo.tipoAquisicao : '-'}"></p>
                 </div>
 
-                <div class="card-soft border-card-3 p-4 flex flex-col justify-center">
-                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wide mb-1">Fiscal Responsável</p>
-                    <p class="text-xs font-bold text-slate-800" th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Não Vinculado'}">
-                        Fernando Fernandes
-                    </p>
+                <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
+                    <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Fiscal Responsável</p>
+                    <p class="text-[10px] font-bold text-slate-800"
+                       th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Não Vinculado'}"></p>
                 </div>
 
-                <div class="card-soft border-card-4 p-4 flex flex-col justify-center">
-                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wide mb-1">Cód. Processo</p>
-                    <p class="text-xs font-bold text-slate-800" th:text="${processo.identificador}">
-                        001-2026
-                    </p>
+                <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
+                    <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Cód. Processo</p>
+                    <p class="text-[10px] font-bold text-slate-800" th:text="${processo.identificador}"></p>
                 </div>
 
-                <div class="card-soft border-card-5 p-4 flex flex-col justify-center">
-                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wide mb-1">Valor do Bem</p>
-                    <p class="text-xs font-bold text-slate-800" th:text="${processo.valorTotal != null ? 'R$ ' + #numbers.formatDecimal(processo.valorTotal, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">
-                        R$ 8.900,00
-                    </p>
+                <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
+                    <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Valor do Bem</p>
+                    <p class="text-[10px] font-bold text-slate-800"
+                       th:text="${processo.valorTotal != null ? 'R$ ' + #numbers.formatDecimal(processo.valorTotal, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}"></p>
                 </div>
-
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start flex-1 pb-6">
 
-                <div class="xl:col-span-2 panel-soft p-6 md:p-8">
-                    <h3 class="text-sm font-extrabold text-slate-700 mb-6">Documentos</h3>
+                <div class="xl:col-span-2 flex flex-col gap-5">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="panel-soft p-5 md:p-6 flex flex-col">
+                        <h3 class="text-xs font-extrabold text-slate-700 mb-4">Documentos</h3>
 
-                        <div class="border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center relative hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group bg-slate-50/50">
-                            <i class="bi bi-arrows-angle-expand absolute top-3 right-3 text-slate-400 group-hover:text-slate-600"></i>
-                            <span class="text-[10px] font-bold text-slate-800 uppercase mb-2 text-center w-full truncate px-4">PBSS</span>
-                            <i class="bi bi-file-earmark-pdf text-3xl text-red-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] text-slate-500 font-medium truncate w-full text-center">PBSS_Documento.pdf</span>
+                        <div class="overflow-y-auto max-h-[110px] pr-2 custom-scrollbar">
+                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+
+                                <div th:if="${documentos == null or #lists.isEmpty(documentos)}"
+                                     class="col-span-full text-center text-slate-400 text-xs italic py-2">
+                                    Nenhum documento encontrado.
+                                </div>
+
+                                <div th:each="doc : ${documentos}"
+                                     class="border border-slate-100 rounded-xl p-2 flex flex-col items-center justify-center relative hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group bg-slate-50/50"
+                                     th:onclick="|window.open('/documentos/${doc.id}')|">
+
+                                    <i class="bi bi-arrows-angle-expand absolute top-1.5 right-1.5 text-slate-400 group-hover:text-slate-600 text-[10px]"></i>
+
+                                    <span class="text-[8px] font-bold text-slate-800 uppercase mb-1.5 text-center w-full truncate px-2"
+                                          th:text="${doc.tipo}">
+                        </span>
+
+                                    <i th:class="${#strings.containsIgnoreCase(doc.nomeArquivo, '.pdf')}
+                                    ? 'bi bi-file-earmark-pdf text-red-500 text-3xl mb-2 group-hover:scale-110 transition-transform'
+                                    : 'bi bi-file-earmark text-gray-500 text-3xl mb-2 group-hover:scale-110 transition-transform'">
+                                    </i>
+
+                                    <span class="text-[9px] text-slate-500 font-medium truncate w-full text-center"
+                                          th:text="${doc.nomeArquivo}">
+                        </span>
+
+                                </div>
+
+                            </div>
                         </div>
-
-                        <div class="border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center relative hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group bg-slate-50/50">
-                            <i class="bi bi-arrows-angle-expand absolute top-3 right-3 text-slate-400 group-hover:text-slate-600"></i>
-                            <span class="text-[10px] font-bold text-slate-800 uppercase mb-2 text-center w-full truncate px-4">AES</span>
-                            <i class="bi bi-file-earmark-pdf text-3xl text-red-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] text-slate-500 font-medium truncate w-full text-center">AES-52.pdf</span>
-                        </div>
-
                     </div>
-                </div>
 
-                <div class="panel-soft p-6 md:p-8">
-                    <h3 class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-widest mb-6">Timeline de Auditoria</h3>
+                    <!-- AÇÕES -->
+                    <div th:if="${acao != null}"
+                         class="panel-soft p-5 md:p-6 flex flex-col">
 
-                    <div class="space-y-6 relative before:absolute before:inset-0 before:ml-1.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                        <h3 class="text-xs font-extrabold text-slate-700 mb-4">
+                            Ações do Processo
+                        </h3>
 
-                        <div th:if="${#lists.isEmpty(historicos)}" class="text-[11px] text-slate-400 font-medium italic text-center">
-                            Nenhuma movimentação registrada.
-                        </div>
+                        <div>
+                            <div th:if="${acao.tipo == 'ANALISE_PROCESSO'}">
+                                <div th:replace="~{fragments/analise-processo :: conteudo}"></div>
+                            </div>
 
-                        <div th:each="hist : ${historicos}" class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div th:if="${acao.tipo == 'CONFIRMAR_RECEBIMENTO'}">
+                                <div th:replace="~{fragments/confirmar-recebimento :: conteudo}"></div>
+                            </div>
 
-                            <div class="flex items-center justify-center w-3 h-3 rounded-full border-2 border-emerald-500 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10"></div>
+                            <div th:if="${acao.tipo == 'VALIDAR_MATERIAL'}">
+                                <div th:replace="~{fragments/analise-processo :: conteudo}"></div>
+                            </div>
 
-                            <div class="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-3 md:pl-0 md:group-even:pr-3 md:group-odd:pl-3">
+                            <div th:if="${acao.tipo == 'SOLICITAR_PAGAMENTO'}">
+                                <div th:replace="~{fragments/solicitar-pagamento:: conteudo}"></div>
+                            </div>
 
-                                <p class="text-xs font-extrabold text-slate-800" th:text="${hist.estadoNovo.descricaoTimeline}">
-                                    Protocolo Validado
-                                </p>
+                            <div th:if="${acao.tipo == 'APROVAR_PAGAMENTO'}">
+                                <div th:replace="~{fragments/aprovar-pagamento :: conteudo}"></div>
+                            </div>
 
-                                <p class="text-[10px] text-slate-500 font-medium mt-0.5">
-                                    <span class="font-bold text-slate-600 uppercase" th:text="${hist.usuario.nome}">GERAF</span>
-                                    •
-                                    <span th:text="${#temporals.format(hist.dataTransicao, 'dd/MM/yyyy, HH:mm')}">17/02/2026, 12:03</span>
-                                </p>
+                            <div th:if="${acao.tipo == 'EXECUTAR_PAGAMENTO'}">
+                                <div th:replace="~{fragments/analise-processo :: conteudo}"></div>
                             </div>
                         </div>
 
                     </div>
+
+                </div>
+
+                <div class="panel-soft p-5 md:p-6 flex flex-col h-full">
+                    <h3 class="text-[9px] font-extrabold text-emerald-600 uppercase tracking-widest mb-5">
+                        Timeline de Auditoria
+                    </h3>
+
+                    <div class="overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
+                        <div class="space-y-4 relative before:absolute before:inset-0 before:ml-[5px] before:w-0.5 before:bg-slate-200">
+
+                            <div th:if="${#lists.isEmpty(historicos)}"
+                                 class="text-[9px] text-slate-400 font-medium italic text-center">
+                                Nenhuma movimentação registrada.
+                            </div>
+
+                            <div th:each="hist : ${historicos}"
+                                 class="relative flex items-center">
+
+                                <div class="w-2.5 h-2.5 rounded-full border-[1.5px] border-emerald-500 bg-white"></div>
+
+                                <div class="ml-3">
+                                    <p class="text-[10px] font-extrabold text-slate-800"
+                                       th:text="${hist.observacao != null ? hist.observacao : hist.estadoNovo.descricaoTimeline}">
+                                    </p>
+
+                                    <p class="text-[8px] text-slate-500">
+                            <span class="font-bold"
+                                  th:text="${hist.usuario.nome}"></span>
+                                        •
+                                        <span th:text="${#temporals.format(hist.dataTransicao, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
         </div>
     </main>
-
 </div>
+
+
+<div th:if="${mensagemSucesso != null}"
+     th:replace="~{fragments/modal-sucesso :: modal(
+        'Ação concluída com sucesso',
+        ${mensagemSucesso},
+        ${processo.identificador},
+        '/processos'
+     )}">
+</div>
+
+<script>
+    function maskMoney(input) {
+        let value = input.value.replace(/\D/g, '');
+
+        if (!value) {
+            input.value = '';
+            return;
+        }
+
+        let numberValue = parseFloat(value) / 100;
+
+        input.value = numberValue.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+    }
+
+    function updateFileName(input, elementId) {
+        const label = document.getElementById(elementId);
+
+        if (input.files.length === 0) {
+            label.innerText = "Clique para selecionar";
+            return;
+        }
+
+        if (input.files.length === 1) {
+            label.innerText = input.files[0].name;
+        } else {
+            label.innerText = input.files.length + " arquivos selecionados";
+         }
+    }
+
+        function confirmarAprovacao() {
+        document.getElementById("modalConfirmacao").classList.remove("hidden");
+        document.getElementById("modalConfirmacao").classList.add("flex");
+    }
+
+        function fecharModal() {
+        document.getElementById("modalConfirmacao").classList.add("hidden");
+        document.getElementById("modalConfirmacao").classList.remove("flex");
+    }
+
+        function enviarAprovacao() {
+        const form = document.querySelector("form");
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "acao";
+        input.value = "aprovar";
+
+        form.appendChild(input);
+
+        form.submit();
+    }
+
+    function fecharModalSucesso() {
+        const modal = document.getElementById('modalSucesso');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            fecharModalSucesso();
+        }
+    });
+
+</script>
 
 </body>
 </html>
