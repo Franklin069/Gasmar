@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conteudo">
+
+    <div class="mb-4">
+        <h4 class="text-sm font-extrabold text-slate-800 tracking-tight">
+            Validar Nota Fiscal
+        </h4>
+        <p class="text-[10px] text-slate-500 mt-1 font-medium italic">
+            Consulte a nota fiscal anexada e valide ou reprove o documento
+        </p>
+    </div>
+
+    <hr class="border-slate-100 mb-5">
+
+    <div class="flex flex-col md:flex-row gap-3 pb-2">
+
+        <button type="button" onclick="abrirModalInconformidade()"
+                class="flex-1 px-5 py-2.5 rounded-xl border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
+        </button>
+
+        <form id="formValidarNota" th:action="@{/processos/{id}/gecont/concordar(id=${processo.id})}" method="POST" class="flex-1 flex">
+            <input type="hidden" name="observacao" value="Nota fiscal validada pela GECONT.">
+
+            <button type="button" onclick="abrirModalConfirmacaoGC()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] px-5 py-2.5 rounded-xl font-bold shadow-md shadow-emerald-200 transition-all hover:scale-[1.02]">
+                Validar Documento
+            </button>
+        </form>
+
+    </div>
+
+    <div id="modalConfirmacao"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Confirmar Validação
+            </h2>
+
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                Você deseja realmente validar esta nota fiscal?
+            </p>
+
+            <div class="flex items-center justify-center space-x-3">
+
+                <button onclick="fecharModalConfirmacaoGC()"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+
+                <button onclick="enviarValidacao()"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Confirmar
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

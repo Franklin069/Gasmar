@@ -1,5 +1,6 @@
 package com.gasflow.gasflow.model;
 
+import com.gasflow.gasflow.enums.StatusGecont;
 import com.gasflow.gasflow.enums.StatusProcesso;
 import com.gasflow.gasflow.enums.TipoAquisicao;
 import com.gasflow.gasflow.enums.TipoProcesso;
@@ -43,4 +44,8 @@ public class Processo {
     @ManyToOne
     @JoinColumn(name = "fiscal_id")
     private Usuario fiscal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_gecont")
+    private StatusGecont statusGecont;
 }

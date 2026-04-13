@@ -32,4 +32,12 @@ public class PagamentoService {
                 )
                 .orElse(null);
     }
+
+    public Pagamento buscarUltimoPagamentoAutorizado(Long processoId) {
+        return pagamentoRepository
+                .findTopByProcessoIdAndStatusOrderByIdDesc(
+                        processoId,
+                        StatusPagamento.AUTORIZADO
+                )
+                .orElse(null);    }
 }

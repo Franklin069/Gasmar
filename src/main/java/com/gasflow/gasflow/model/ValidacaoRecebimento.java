@@ -23,13 +23,6 @@ public class ValidacaoRecebimento {
     @Column(name = "data_validacao", nullable = false)
     private LocalDateTime dataValidacao;
 
-    @Column(length = 1000)
-    private String descricaoProblema;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "acao_nao_conformidade")
-    private AcaoNaoConformidade acaoNaoConformidade;
-
     @ManyToOne
     @JoinColumn(name = "registro_entrega_id", nullable = false)
     private RegistroEntrega registroEntrega;
