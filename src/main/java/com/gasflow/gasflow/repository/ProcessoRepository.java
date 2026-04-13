@@ -16,7 +16,6 @@ public interface ProcessoRepository extends JpaRepository<Processo, Long> {
 
     long countByEstadoAtual(StatusProcesso estadoAtual);
 
-
     List<Processo> findAllByOrderByIdDesc();
 
     List<Processo> findBySetorDemandanteOrderByIdDesc(Usuario usuario);

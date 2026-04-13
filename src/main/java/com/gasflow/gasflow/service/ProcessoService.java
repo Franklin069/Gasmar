@@ -50,7 +50,7 @@ public class ProcessoService {
     }
 
     public List<Processo> listarTodos() {
-        return processoRepository.findAll();
+        return processoRepository.findAllByOrderByIdDesc();
     }
 
     public Processo buscarPorId(Long id) {
@@ -237,7 +237,7 @@ public class ProcessoService {
         historico.setEstadoAnterior(estadoAnterior);
         historico.setEstadoNovo(processo.getEstadoAtual());
         historico.setDataTransicao(LocalDateTime.now());
-        historico.setObservacao("Compra realizada pela GERAF");
+        historico.setObservacao("Análise realizada pela GERAF");
         historico.setProcesso(processo);
         historico.setUsuario(usuarioLogado);
 
@@ -367,7 +367,7 @@ public class ProcessoService {
         Double valorTotal = processo.getValorTotal();
         Double valorPagoTotal = pagamentoService.calcularValorPago(processo.getId());
 
-        Double restante = valorTotal - (valorPagoTotal != null ? valorPagoTotal : 0);
+        Double restante = Math.max(0, valorTotal - (valorPagoTotal != null ? valorPagoTotal : 0));
 
         StatusProcesso novoEstado;
 
@@ -376,14 +376,12 @@ public class ProcessoService {
 
         } else {
 
-            if (restante <= 0) {
+            if (restante <= 0.01) {
                 novoEstado = StatusProcesso.ENCERRADO;
-
             } else {
                 novoEstado = StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO;
             }
         }
-
         processo.setEstadoAtual(novoEstado);
         processoRepository.save(processo);
 
@@ -483,17 +481,29 @@ public class ProcessoService {
 
         StatusProcesso novoEstado;
 
-        switch (estadoAnterior) {
-            case AGUARDANDO_VALIDACAO_MATERIAL:
-                novoEstado = StatusProcesso.RECEBIDO_NAO_CONFORME;
-                break;
+        if (processo.getStatusGecont() == StatusGecont.AGUARDANDO_VALIDACAO &&
+                "GECONT".equalsIgnoreCase(usuario.getSetor().getSigla())) {
 
-            case AGUARDANDO_AUTORIZACAO_PAGAMENTO:
-                novoEstado = StatusProcesso.SOLICITACAO_NAO_CONFORME;
-                break;
+            novoEstado = StatusProcesso.NF_NAO_CONFORME;
+            processo.setStatusGecont(StatusGecont.NAO_CONFORME);
 
-            default:
-                novoEstado = StatusProcesso.NF_NAO_CONFORME;
+        } else {
+            switch (estadoAnterior) {
+                case AGUARDANDO_VALIDACAO_MATERIAL:
+                    novoEstado = StatusProcesso.RECEBIDO_NAO_CONFORME;
+                    processo.setStatusGecont(StatusGecont.NAO_CONFORME);
+
+                    break;
+
+                case AGUARDANDO_AUTORIZACAO_PAGAMENTO:
+                case AGUARDANDO_ANALISE:
+                    novoEstado = StatusProcesso.SOLICITACAO_NAO_CONFORME;
+                    processo.setStatusGecont(StatusGecont.NAO_CONFORME);
+                    break;
+
+                default:
+                    novoEstado = StatusProcesso.SOLICITACAO_NAO_CONFORME; // Fallback seguro
+            }
         }
 
         processo.setEstadoAtual(novoEstado);

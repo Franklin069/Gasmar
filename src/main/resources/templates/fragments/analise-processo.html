@@ -23,7 +23,12 @@
             <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
                 Valor Total do Processo
             </label>
-            <input type="text" name="valorTotal" placeholder="Ex: 12.000,00" class="w-full p-2 border rounded-xl text-sm" required>
+            <input type="text"
+                   name="valorTotal"
+                   placeholder="R$ 0,00"
+                   class="w-full p-2 border rounded-xl text-sm"
+                   oninput="maskMoney(this)"
+                   required>
         </div>
 
         <div>
@@ -139,6 +144,26 @@
     </div>
 
     <script>
+            function maskMoney(input) {
+            let value = input.value.replace(/\D/g, "");
+
+            if (value.length === 0) {
+            input.value = "";
+            return;
+        }
+
+            while (value.length < 3) {
+            value = "0" + value;
+        }
+
+            let integerPart = value.slice(0, -2);
+            let decimalPart = value.slice(-2);
+
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+            input.value = "R$ " + integerPart + "," + decimalPart;
+        }
+
         // -- Controle de Interface --
         const radios = document.querySelectorAll('input[name="tipoAquisicao"]');
         const fiscalField = document.getElementById('fiscal-field');
