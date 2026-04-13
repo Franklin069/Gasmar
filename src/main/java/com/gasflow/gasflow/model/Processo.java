@@ -6,6 +6,8 @@ import com.gasflow.gasflow.enums.TipoProcesso;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "processos")
 @Data
@@ -31,6 +33,27 @@ public class Processo {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_aquisicao")
     private TipoAquisicao tipoAquisicao;
+
+    @Column(name = "fornecedor_nome", length = 255)
+    private String fornecedorNome;
+
+    @Column(name = "fornecedor_cnpj", length = 18)
+    private String fornecedorCnpj;
+
+    @Column(name = "valor_negociado")
+    private Double valorNegociado;
+
+    @Column(name = "numero_nota_fiscal", length = 100)
+    private String numeroNotaFiscal;
+
+    @Column(name = "valor_nota_fiscal")
+    private Double valorNotaFiscal;
+
+    @Column(name = "justificativa_divergencia_nf", length = 1000)
+    private String justificativaDivergenciaNf;
+
+    @Column(name = "data_encerramento")
+    private LocalDateTime dataEncerramento;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_atual", nullable = false)

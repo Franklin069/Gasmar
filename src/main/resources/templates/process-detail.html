@@ -17,84 +17,133 @@
             border-radius: 28px;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         }
+
+        .input-soft {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .input-soft:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
     </style>
 </head>
 <body class="min-h-screen p-8">
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-6xl mx-auto space-y-8">
 
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-800">Detalhe do Processo</h1>
-            <p class="text-sm text-slate-500">Visualizacao completa do fluxo do processo</p>
+            <p class="text-sm text-slate-500">Fluxo completo de compras, pagamento, recebimento e validacao fiscal</p>
         </div>
 
-        <a th:href="@{/processos}"
-           class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-3 rounded-xl">
-            Voltar
-        </a>
+        <div class="flex gap-3">
+            <a th:href="@{/processos/todos}"
+               class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-3 rounded-xl">
+                Todos os Processos
+            </a>
+            <a th:href="@{/processos}"
+               class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-3 rounded-xl">
+                Dashboard
+            </a>
+        </div>
     </div>
 
-    <section class="card-soft p-8 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <div>
+    <section class="card-soft p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
+            <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Identificador</p>
-                <p class="text-lg font-bold text-slate-800" th:text="${processo.identificador}">PROC-0001</p>
+                <p class="text-lg font-bold text-slate-800 break-words" th:text="${processo.identificador}">PROC-0001</p>
             </div>
 
-            <div>
+            <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Status Atual</p>
-                <p class="text-lg font-bold text-emerald-600" th:text="${processo.estadoAtual}">AGUARDANDO_ANALISE_GERAF</p>
+                <p class="text-base xl:text-lg font-bold text-emerald-600 break-words leading-snug" th:text="${processo.estadoAtual}">AGUARDANDO_ANALISE_GERAF</p>
             </div>
 
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Titulo</p>
-                <p class="text-lg font-semibold text-slate-800" th:text="${processo.titulo}">Compra de materiais</p>
-            </div>
-
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Valor Total</p>
-                <p class="text-lg font-semibold text-slate-800"
-                   th:text="${#numbers.formatDecimal(processo.valorTotal,1,'POINT',2,'COMMA')}">
-                    0,00
-                </p>
-            </div>
-
-            <div>
+            <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Processo</p>
-                <p class="text-lg font-semibold text-slate-800" th:text="${processo.tipoProcesso}">COMPRA_BEM</p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${processo.tipoProcesso}">COMPRA_BEM</p>
             </div>
 
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Aquisicao</p>
-                <p class="text-lg font-semibold text-slate-800" th:text="${processo.tipoAquisicao}">CPV</p>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Valor Total da PABS</p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${#numbers.formatDecimal(processo.valorTotal,1,'POINT',2,'COMMA')}">0,00</p>
             </div>
 
-            <div>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Titulo</p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${processo.titulo}">Compra de materiais</p>
+            </div>
+
+            <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Demandante</p>
-                <p class="text-lg font-semibold text-slate-800"
-                   th:text="${processo.setorDemandante != null ? processo.setorDemandante.nome : 'Nao informado'}">
-                    Usuario
-                </p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${processo.setorDemandante != null ? processo.setorDemandante.nome : 'Nao informado'}">Usuario</p>
             </div>
 
-            <div>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Aquisicao</p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${processo.tipoAquisicao != null ? processo.tipoAquisicao : 'Nao definido'}">CPV</p>
+            </div>
+
+            <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Fiscal</p>
-                <p class="text-lg font-semibold text-slate-800"
-                   th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Nao definido'}">
-                    Nao definido
-                </p>
+                <p class="text-lg font-semibold text-slate-800 break-words" th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Nao definido'}">Nao definido</p>
             </div>
-
         </div>
     </section>
 
-    <section class="card-soft p-8 mb-8">
+    <section class="card-soft p-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800 mb-1">Resumo do Processo</h2>
+                <p class="text-sm text-slate-500">Visao consolidada exigida pelo fluxo do MVP</p>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wide text-slate-400"
+                  th:text="${processo.dataEncerramento != null ? 'Encerrado' : 'Em andamento'}">Em andamento</span>
+        </div>
+
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-sm text-slate-700 leading-7"
+             th:text="${resumoProcesso}">
+            Resumo do processo
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Fornecedor</p>
+                <p class="font-semibold text-slate-800" th:text="${processo.fornecedorNome != null ? processo.fornecedorNome : 'Nao definido'}">Nao definido</p>
+                <p class="text-sm text-slate-500 mt-1" th:text="${processo.fornecedorCnpj != null ? processo.fornecedorCnpj : 'Sem CNPJ'}">Sem CNPJ</p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Valor Negociado</p>
+                <p class="font-semibold text-slate-800" th:text="${processo.valorNegociado != null ? #numbers.formatDecimal(processo.valorNegociado,1,'POINT',2,'COMMA') : 'Nao informado'}">Nao informado</p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Pagamento</p>
+                <p class="font-semibold text-slate-800" th:text="${pagamento != null ? pagamento.status : 'Nao solicitado'}">Nao solicitado</p>
+                <p class="text-sm text-slate-500 mt-1" th:text="${pagamento != null ? pagamento.tipoPagamento : ''}"></p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Recebimento</p>
+                <p class="font-semibold text-slate-800" th:text="${validacaoRecebimento != null ? validacaoRecebimento.status : 'Nao registrado'}">Nao registrado</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="card-soft p-8">
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-xl font-extrabold text-slate-800 mb-1">Documentos do Processo</h2>
-                <p class="text-sm text-slate-500">Visualize ou baixe os arquivos anexados</p>
+                <p class="text-sm text-slate-500">PABS, anexos, comprovantes, evidencias e nota fiscal</p>
             </div>
             <span class="text-xs font-bold uppercase tracking-wide text-slate-400"
                   th:text="${#lists.size(documentos) + ' arquivo(s)'}">0 arquivo(s)</span>
@@ -109,12 +158,10 @@
             <div th:each="documento : ${documentos}"
                  class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wide text-emerald-600"
-                       th:text="${documento.tipo}">PABS</p>
-                    <p class="text-base font-semibold text-slate-800 break-all"
-                       th:text="${documento.nomeArquivo}">arquivo.pdf</p>
+                    <p class="text-xs font-bold uppercase tracking-wide text-emerald-600" th:text="${documento.tipo}">PABS</p>
+                    <p class="text-base font-semibold text-slate-800 break-all" th:text="${documento.nomeArquivo}">arquivo.pdf</p>
                     <p class="text-sm text-slate-500"
-                       th:text="'Enviado em ' + ${#temporals.format(documento.dataUpload, 'dd/MM/yyyy HH:mm')}">
+                       th:text="'Enviado em ' + ${#temporals.format(documento.dataUpload, 'dd/MM/yyyy HH:mm')} + ' por ' + ${documento.usuarioUpload.nome}">
                         Enviado em 01/01/2026 10:00
                     </p>
                 </div>
@@ -138,92 +185,224 @@
     <section class="card-soft p-8">
         <h2 class="text-xl font-extrabold text-slate-800 mb-6">Acoes Disponiveis</h2>
 
-        <div class="flex flex-wrap gap-4">
-
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
-                  th:action="@{/processos/{id}/autorizar(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Autorizar Compra
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
+                  th:action="@{/processos/{id}/analisar(id=${processo.id})}" method="post" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Analise do GERAF</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Tipo de aquisicao</label>
+                        <select name="tipoAquisicao" class="input-soft w-full" required>
+                            <option value="">Selecione</option>
+                            <option value="CPV" th:selected="${processo.tipoAquisicao != null and processo.tipoAquisicao.name() == 'CPV'}">CPV</option>
+                            <option value="CONTRATO" th:selected="${processo.tipoAquisicao != null and processo.tipoAquisicao.name() == 'CONTRATO'}">Contrato</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor negociado</label>
+                        <input type="number" step="0.01" name="valorNegociado" class="input-soft w-full"
+                               th:value="${processo.valorNegociado}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Fornecedor</label>
+                        <input type="text" name="fornecedorNome" class="input-soft w-full"
+                               th:value="${processo.fornecedorNome}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">CNPJ</label>
+                        <input type="text" name="fornecedorCnpj" class="input-soft w-full"
+                               th:value="${processo.fornecedorCnpj}" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Fiscal do contrato</label>
+                        <select name="fiscalId" class="input-soft w-full">
+                            <option value="">Selecione se o rito for contrato</option>
+                            <option th:each="fiscalItem : ${fiscais}"
+                                    th:value="${fiscalItem.id}"
+                                    th:text="${fiscalItem.nome + ' - ' + fiscalItem.perfil}"
+                                    th:selected="${processo.fiscal != null and processo.fiscal.id == fiscalItem.id}">
+                                Fiscal
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-3 rounded-xl text-sm">
+                    Salvar Analise
                 </button>
             </form>
 
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
-                  th:action="@{/processos/{id}/rejeitar(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Rejeitar Processo
+            <div th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
+                 class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Decisao do GERAF</h3>
+                <p class="text-sm text-slate-500">A autorizacao so sera liberada depois que o rito, o fornecedor, o CNPJ e o valor negociado estiverem preenchidos.</p>
+                <div class="flex flex-wrap gap-3">
+                    <form th:action="@{/processos/{id}/autorizar(id=${processo.id})}" method="post">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-5 py-3 rounded-xl">
+                            Autorizar Compra
+                        </button>
+                    </form>
+                    <form th:action="@{/processos/{id}/rejeitar(id=${processo.id})}" method="post">
+                        <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-3 rounded-xl">
+                            Rejeitar Processo
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form th:if="${processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA and (usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF or (processo.fiscal != null and usuarioLogado.id == processo.fiscal.id))}"
+                  th:action="@{/processos/{id}/solicitar-pagamento(id=${processo.id})}" method="post" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Solicitar Pagamento</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Tipo de pagamento</label>
+                        <select name="tipoPagamento" class="input-soft w-full" required>
+                            <option value="">Selecione</option>
+                            <option th:each="tipoPagamentoItem : ${tipoPagamentoOptions}" th:value="${tipoPagamentoItem.name()}" th:text="${tipoPagamentoItem}">TIPO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor solicitado</label>
+                        <input type="number" step="0.01" name="valorSolicitado" class="input-soft w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Data da solicitacao</label>
+                        <input type="date" name="dataSolicitacao" class="input-soft w-full" required>
+                    </div>
+                </div>
+                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-3 rounded-xl text-sm">
+                    Solicitar Pagamento
                 </button>
             </form>
 
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA}"
-                  th:action="@{/processos/{id}/aprovar-pagamento(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-purple-500 hover:bg-purple-600 text-white font-bold px-5 py-3 rounded-xl">
+            <div th:if="${pagamento != null}" class="rounded-2xl border border-slate-200 p-5 space-y-3">
+                <h3 class="font-extrabold text-slate-800">Situacao do Pagamento</h3>
+                <p class="text-sm text-slate-600"><strong>Tipo:</strong> <span th:text="${pagamento.tipoPagamento}">SEM_ADIANTAMENTO</span></p>
+                <p class="text-sm text-slate-600"><strong>Status:</strong> <span th:text="${pagamento.status}">PENDENTE</span></p>
+                <p class="text-sm text-slate-600"><strong>Valor solicitado:</strong> <span th:text="${#numbers.formatDecimal(pagamento.valorSolicitado,1,'POINT',2,'COMMA')}">0,00</span></p>
+                <p class="text-sm text-slate-600"><strong>Solicitado em:</strong> <span th:text="${pagamento.dataSolicitacao}">2026-04-13</span></p>
+            </div>
+
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR and pagamento != null and pagamento.status == T(com.gasflow.gasflow.enums.StatusPagamento).PENDENTE and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO}"
+                  th:action="@{/processos/{id}/aprovar-pagamento(id=${processo.id})}" method="post" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Aprovacao do Gestor</h3>
+                <p class="text-sm text-slate-500">Aprovacao com visao de valor solicitado, documentos, tipo de aquisicao e situacao atual do processo.</p>
+                <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white font-bold px-5 py-3 rounded-xl">
                     Aprovar Pagamento
                 </button>
             </form>
 
-            <form th:if="${processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO}"
-                  th:action="@{/processos/{id}/registrar-pagamento(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-3 rounded-xl">
+            <form th:if="${(usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF or usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).ADMIN) and pagamento != null and pagamento.status == T(com.gasflow.gasflow.enums.StatusPagamento).APROVADO and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO}"
+                  th:action="@{/processos/{id}/registrar-pagamento(id=${processo.id})}" method="post" enctype="multipart/form-data" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Registro do Pagamento</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor pago</label>
+                        <input type="number" step="0.01" name="valorPago" class="input-soft w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Data do pagamento</label>
+                        <input type="date" name="dataPagamento" class="input-soft w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Comprovante</label>
+                        <input type="file" name="comprovantePagamentoFile" class="input-soft w-full" accept=".pdf,.png,.jpg,.jpeg">
+                    </div>
+                </div>
+                <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-3 rounded-xl">
                     Registrar Pagamento
                 </button>
             </form>
 
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
-                  th:action="@{/processos/{id}/receber-conforme(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Receber Conforme
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
+                  th:action="@{/processos/{id}/receber(id=${processo.id})}" method="post" enctype="multipart/form-data" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Registro de Recebimento</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Nome do recebedor</label>
+                        <input type="text" name="nomeRecebedor" class="input-soft w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Resultado do recebimento</label>
+                        <select name="conforme" class="input-soft w-full" required>
+                            <option value="true">Conforme</option>
+                            <option value="false">Nao conforme</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Descricao do problema</label>
+                        <textarea name="descricaoProblema" class="input-soft w-full min-h-[110px]" placeholder="Obrigatorio em caso de nao conformidade"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Acao adotada</label>
+                        <select name="acaoNaoConformidade" class="input-soft w-full">
+                            <option value="">Selecione quando houver nao conformidade</option>
+                            <option th:each="acaoItem : ${acaoNaoConformidadeOptions}" th:value="${acaoItem.name()}" th:text="${acaoItem}">ACAO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Evidencia</label>
+                        <input type="file" name="evidenciaRecebimentoFile" class="input-soft w-full" accept=".png,.jpg,.jpeg,.pdf">
+                    </div>
+                </div>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Salvar Recebimento
                 </button>
             </form>
 
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
-                  th:action="@{/processos/{id}/receber-nao-conforme(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-red-500 hover:bg-red-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Receber Nao Conforme
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT and (processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME or processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_NAO_CONFORME)}"
+                  th:action="@{/processos/{id}/validar-nf(id=${processo.id})}" method="post" enctype="multipart/form-data" class="rounded-2xl border border-slate-200 p-5 space-y-4">
+                <h3 class="font-extrabold text-slate-800">Validacao da Nota Fiscal</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Numero da nota fiscal</label>
+                        <input type="text" name="numeroNotaFiscal" class="input-soft w-full" th:value="${processo.numeroNotaFiscal}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor da nota fiscal</label>
+                        <input type="number" step="0.01" name="valorNotaFiscal" class="input-soft w-full" th:value="${processo.valorNotaFiscal}" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Justificativa para divergencia</label>
+                        <textarea name="justificativaDivergencia" class="input-soft w-full min-h-[110px]" placeholder="Obrigatoria quando o valor da NF divergir do valor negociado" th:text="${processo.justificativaDivergenciaNf}"></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Arquivo da nota fiscal</label>
+                        <input type="file" name="notaFiscalFile" class="input-soft w-full" accept=".pdf,.png,.jpg,.jpeg">
+                    </div>
+                </div>
+                <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Validar e Encerrar Processo
                 </button>
             </form>
-
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT
-                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME}"
-                  th:action="@{/processos/{id}/validar-nf(id=${processo.id})}"
-                  method="post">
-                <button type="submit"
-                        class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Validar Nota Fiscal
-                </button>
-            </form>
-
         </div>
 
-        <div th:if="${(usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
-                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR
-                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA)
-                     and (processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
-                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).PAGO)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT
-                      or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME)}"
-             class="mt-6 text-slate-400 text-sm">
-            Nenhuma acao disponivel para este perfil no estado atual do processo.
+        <div th:if="${#lists.isEmpty(historico)}" class="mt-6 text-slate-400 text-sm">
+            Nenhuma acao adicional disponivel ou nenhum historico registrado.
         </div>
+    </section>
 
+    <section class="card-soft p-8">
+        <h2 class="text-xl font-extrabold text-slate-800 mb-6">Historico e Auditoria</h2>
+        <div th:if="${#lists.isEmpty(historico)}" class="text-sm text-slate-500">
+            Nenhuma transicao registrada ate o momento.
+        </div>
+        <div th:if="${!#lists.isEmpty(historico)}" class="space-y-4">
+            <div th:each="item : ${historico}" class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                        <p class="font-semibold text-slate-800"
+                           th:text="${(item.estadoAnterior != null ? item.estadoAnterior : 'INICIO') + ' -> ' + item.estadoNovo}">
+                            INICIO -> AGUARDANDO_ANALISE_GERAF
+                        </p>
+                        <p class="text-sm text-slate-500" th:text="${item.observacao}">Observacao</p>
+                    </div>
+                    <div class="text-sm text-slate-500">
+                        <p th:text="${item.usuario.nome}">Usuario</p>
+                        <p th:text="${#temporals.format(item.dataTransicao, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
 </div>
