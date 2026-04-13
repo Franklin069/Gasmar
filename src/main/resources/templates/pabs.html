@@ -41,6 +41,13 @@
             background: #f8fffb;
             border-radius: 22px;
             min-height: 84px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-box:hover {
+            background: #ecfdf5; /* emerald-50 */
+            border-color: #34d399; /* emerald-400 */
         }
 
         .menu-active {
@@ -53,8 +60,7 @@
 
 <div class="flex min-h-screen">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5">
+    <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5 fixed h-full z-20">
         <div>
             <div class="mb-10 px-1">
                 <h1 class="text-2xl font-extrabold tracking-tight leading-none">GASFLOW</h1>
@@ -65,7 +71,6 @@
 
             <div class="mb-5">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Principal</p>
-
                 <a th:href="@{/processos}"
                    class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10">
                     <span class="text-sm">◧</span>
@@ -75,7 +80,6 @@
 
             <div class="mb-5">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
-
                 <a th:href="@{/processos/novo}"
                    class="menu-active flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2">
                     <span class="text-sm">◫</span>
@@ -85,8 +89,7 @@
 
             <div>
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Dados</p>
-
-                <a href="#"
+                <a th:href="@{/processos}"
                    class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full hover:bg-white/10">
                     <span class="text-sm">◫</span>
                     <span>Todos os Processos</span>
@@ -97,16 +100,14 @@
         <div class="bg-white/10 rounded-2xl p-3">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold">
-                    <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">L</span>
+                    <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">U</span>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] font-semibold truncate"
                        th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">
-                        Lauro Silva
                     </p>
                     <p class="text-[8px] text-emerald-300 truncate"
                        th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">
-                        Demandante
                     </p>
                 </div>
             </div>
@@ -118,86 +119,70 @@
         </div>
     </aside>
 
-    <!-- CONTEÚDO -->
-    <main class="flex-1 px-8 py-5">
+    <main class="flex-1 ml-[240px] px-8 py-8 h-screen overflow-y-auto">
         <h2 class="text-[22px] font-extrabold text-slate-800 mb-6">Nova Requisição (PABS)</h2>
 
         <section class="form-shell max-w-[510px] p-6">
-            <form th:action="@{/processos/salvar}" method="post" th:object="${processo}">
-                <div class="grid grid-cols-2 gap-5 mb-5">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Título da Demanda</label>
-                        <input type="text"
-                               th:field="*{titulo}"
-                               class="input-soft w-full"
-                               placeholder="Ex: Válvulas"
-                               required>
-                    </div>
+            <form th:action="@{/processos/salvar}" method="post" enctype="multipart/form-data" th:object="${processo}">
 
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-700 mb-2">Prioridade</label>
-                        <select class="input-soft w-full">
-                            <option>Normal</option>
-                            <option>Urgente</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-5">
-                    <label class="block text-[10px] font-bold text-slate-700 mb-2">Valor Total</label>
-                    <input type="number"
-                           step="0.01"
-                           th:field="*{valorTotal}"
+                <div class="mb-6">
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2">Título da Demanda</label>
+                    <input type="text"
+                           th:field="*{titulo}"
                            class="input-soft w-full"
-                           placeholder="Ex: 1500.00"
+                           placeholder="Ex: Aquisição de Válvulas Borboleta"
                            required>
                 </div>
 
-                <input type="hidden" th:field="*{tipoProcesso}" value="COMPRA_BEM">
-                <input type="hidden" th:field="*{tipoAquisicao}" value="CPV">
+                <hr class="border-slate-200 mb-6">
 
-                <div class="grid grid-cols-2 gap-5 mb-5">
-                    <div class="upload-box flex flex-col items-center justify-center text-center px-4 py-6">
-                        <div class="text-emerald-500 text-2xl mb-2">📄</div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <label class="upload-box flex flex-col items-center justify-center text-center px-4 py-5 group">
+                        <div class="text-emerald-500 text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">Memorial Descritivo</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
-                    </div>
+                        <p id="labelMemorial" class="text-[8px] text-emerald-600 font-bold mt-2 truncate max-w-full px-2">Selecionar PDF</p>
+                        <input type="file" name="docMemorial" accept=".pdf" class="hidden" onchange="updateFileName(this, 'labelMemorial')">
+                    </label>
 
-                    <div class="upload-box flex flex-col items-center justify-center text-center px-4 py-6">
-                        <div class="text-emerald-500 text-2xl mb-2">📄</div>
+                    <label class="upload-box flex flex-col items-center justify-center text-center px-4 py-5 group">
+                        <div class="text-emerald-500 text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
                         <p class="text-[9px] font-bold text-slate-700 uppercase">PABS (Obrigatório)</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
-                    </div>
+                        <p id="labelPabs" class="text-[8px] text-emerald-600 font-bold mt-2 truncate max-w-full px-2">Selecionar PDF</p>
+                        <input type="file" name="docPabs" accept=".pdf" class="hidden" required onchange="updateFileName(this, 'labelPabs')">
+                    </label>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
-                        <div class="text-emerald-500 text-xl mb-2">📄</div>
-                        <p class="text-[9px] font-bold text-slate-700 uppercase">Mapa de Cotação</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
-                    </div>
+                <div class="grid grid-cols-3 gap-3 mb-8">
+                    <label class="upload-box flex flex-col items-center justify-center text-center px-2 py-5 group">
+                        <div class="text-emerald-500 text-xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                        <p class="text-[8px] font-bold text-slate-700 uppercase">Mapa de Cotação</p>
+                        <p id="labelMapa" class="text-[8px] text-emerald-600 font-bold mt-2 truncate max-w-full px-1">Selecionar</p>
+                        <input type="file" name="docMapa" accept=".pdf" class="hidden" onchange="updateFileName(this, 'labelMapa')">
+                    </label>
 
-                    <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
-                        <div class="text-emerald-500 text-xl mb-2">📄</div>
-                        <p class="text-[9px] font-bold text-slate-700 uppercase">Propostas</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
-                    </div>
+                    <label class="upload-box flex flex-col items-center justify-center text-center px-2 py-5 group">
+                        <div class="text-emerald-500 text-xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                        <p class="text-[8px] font-bold text-slate-700 uppercase">Propostas</p>
+                        <p id="labelPropostas" class="text-[8px] text-emerald-600 font-bold mt-2 truncate max-w-full px-1">Selecionar</p>
+                        <input type="file" name="docPropostas" accept=".pdf" class="hidden" onchange="updateFileName(this, 'labelPropostas')">
+                    </label>
 
-                    <div class="upload-box flex flex-col items-center justify-center text-center px-3 py-6">
-                        <div class="text-emerald-500 text-xl mb-2">📄</div>
-                        <p class="text-[9px] font-bold text-slate-700 uppercase">Outros</p>
-                        <p class="text-[8px] text-emerald-600 font-bold mt-2">Selecionar PDF</p>
-                    </div>
+                    <label class="upload-box flex flex-col items-center justify-center text-center px-2 py-5 group">
+                        <div class="text-emerald-500 text-xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                        <p class="text-[8px] font-bold text-slate-700 uppercase">Outros</p>
+                        <p id="labelOutros" class="text-[8px] text-emerald-600 font-bold mt-2 truncate max-w-full px-1">Selecionar</p>
+                        <input type="file" name="docOutros" multiple class="hidden" onchange="updateFileName(this, 'labelOutros')">
+                    </label>
                 </div>
 
                 <div class="flex justify-end gap-3">
                     <a th:href="@{/processos}"
-                       class="bg-gray-300 text-slate-800 px-8 py-3 rounded-xl font-bold text-sm">
+                       class="bg-slate-200 text-slate-600 hover:bg-slate-300 px-8 py-3 rounded-xl font-bold text-sm transition-colors">
                         Cancelar
                     </a>
 
                     <button type="submit"
-                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold text-sm">
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md shadow-emerald-200 transition-all hover:scale-[1.02]">
                         Protocolar
                     </button>
                 </div>
@@ -205,6 +190,25 @@
         </section>
     </main>
 </div>
+
+<script>
+    // Função para atualizar o texto da caixinha com o nome do arquivo selecionado
+    function updateFileName(input, labelId) {
+        const label = document.getElementById(labelId);
+        if (input.files && input.files.length > 0) {
+            if (input.files.length === 1) {
+                label.innerText = input.files[0].name;
+                label.classList.replace('text-emerald-600', 'text-slate-800');
+            } else {
+                label.innerText = input.files.length + " arquivos selecionados";
+                label.classList.replace('text-emerald-600', 'text-slate-800');
+            }
+        } else {
+            label.innerText = "Selecionar PDF";
+            label.classList.replace('text-slate-800', 'text-emerald-600');
+        }
+    }
+</script>
 
 </body>
 </html>

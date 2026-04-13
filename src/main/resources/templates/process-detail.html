@@ -76,10 +76,11 @@
                 </a>
             </div>
 
-            <div class="mb-5">
+            <div class="mb-5" th:if="${session.usuarioLogado != null and session.usuarioLogado.cargo.name() == 'DEMANDANTE'}">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
+
                 <a th:href="@{/processos/novo}"
-                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition">
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition-colors">
                     <span class="text-sm">◫</span>
                     <span>Requisições</span>
                 </a>
@@ -118,7 +119,7 @@
         <div class="max-w-6xl mx-auto space-y-6 h-full flex flex-col">
 
             <header class="flex items-center space-x-3 shrink-0">
-                <a onclick="history.back()"
+                <a th:href="@{/processos}"
                         class="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 shadow-sm transition-all">
                     <i class="bi bi-arrow-left text-base"></i>
                 </a>
@@ -131,7 +132,9 @@
                 <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
                     <p class="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-1">Modalidade do
                         Processo</p>
-                    <p class="text-[10px] font-bold text-slate-800" th:text="${processo.tipoProcesso.descricao}"></p>
+                    <p class="text-[10px] font-bold text-slate-800"
+                       th:text="${processo.tipoProcesso != null ? processo.tipoProcesso.descricao : 'A Classificar'}">
+                    </p>
                 </div>
 
                 <div class="card-soft border-card-1 p-3.5 flex flex-col justify-center">
@@ -213,6 +216,10 @@
 
                                 <div th:if="${acao.tipo == 'ANALISE_PROCESSO'}">
                                     <div th:replace="~{fragments/analise-processo :: conteudo}"></div>
+                                </div>
+
+                                <div th:if="${acao.tipo == 'ANALISE_FISCAL'}">
+                                    <div th:replace="~{fragments/analise-fiscal :: conteudo}"></div>
                                 </div>
 
                                 <div th:if="${acao.tipo == 'CONFIRMAR_RECEBIMENTO'}">
@@ -435,22 +442,50 @@
 
     // Controles do Modal de Confirmação Principal
     function abrirModalConfirmacaoGeraf() {
-        const form = document.getElementById('gerafForm');
-        // Validar HTML5 required antes de abrir o modal
-        if (!form.reportValidity()) {
-            return;
-        }
-        document.getElementById("modalConfirmacaoGeraf").classList.remove("hidden");
+        document.getElementById('modalConfirmacaoGeraf').classList.remove('hidden');
         document.getElementById("modalConfirmacaoGeraf").classList.add("flex");
+
     }
 
-    function fecharModalConfirmacaoGeraf() {
-        document.getElementById("modalConfirmacaoGeraf").classList.add("hidden");
-        document.getElementById("modalConfirmacaoGeraf").classList.remove("flex");
+    function abrirModalAdiantamento() {
+        document.getElementById('modalConfirmacaoGeraf').classList.add('hidden');
+        document.getElementById('modalAdiantamento').classList.remove('hidden');
+        document.getElementById("modalAdiantamento").classList.add("flex");
+
+        // 2. Verifica se a GERAF selecionou um Fiscal no dropdown
+        const selectFiscal = document.querySelector('select[name="fiscalId"]');
+        const temFiscal = selectFiscal && selectFiscal.value !== "";
+
+        if (temFiscal) {
+            // Se tem fiscal, pula o modal de adiantamento e envia o form direto (passando false)
+            enviarComAdiantamento(false);
+        } else {
+            // Se NÃO tem fiscal, exibe o modal de adiantamento normalmente
+            document.getElementById("modalAdiantamento").classList.remove("hidden");
+            document.getElementById("modalAdiantamento").classList.add("flex");
+        }
     }
 
-    function enviarFormularioGeraf() {
+    function enviarComAdiantamento(valor) {
+        document.getElementById('adiantamentoInput').value = valor;
         document.getElementById('gerafForm').submit();
+    }
+
+    function abrirModalConfirmacaoFiscal() {
+        document.getElementById('modalConfirmacaoFiscal').classList.remove('hidden');
+        document.getElementById("modalConfirmacaoFiscal").classList.add("flex");
+    }
+
+    function abrirModalAdiantamentoFiscal() {
+        document.getElementById('modalConfirmacaoFiscal').classList.add('hidden');
+        document.getElementById('modalAdiantamentoFiscal').classList.remove('hidden');
+        document.getElementById("modalAdiantamentoFiscal").classList.add("flex");
+
+    }
+
+    function enviarFiscal(valor) {
+        document.getElementById('adiantamentoFiscal').value = valor;
+        document.getElementById('fiscalForm').submit();
     }
 </script>
 

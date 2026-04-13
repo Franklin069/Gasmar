@@ -22,11 +22,11 @@ public class Processo {
     @Column(nullable = false, length = 255)
     private String titulo;
 
-    @Column(name = "valor_total", nullable = false)
+    @Column(name = "valor_total")
     private Double valorTotal;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_processo", nullable = false)
+    @Column(name = "tipo_processo")
     private TipoProcesso tipoProcesso;
 
     @Enumerated(EnumType.STRING)

@@ -28,6 +28,8 @@ public class ProcessoController {
     private final RegistroEntregaService registroEntregaService;
     private final ValidacaoRecebimentoRepository validacaoRecebimentoRepository;
     private final PagamentoRepository pagamentoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final SetorRepository setorRepository;
 
     @Autowired
     private DocumentoRepository documentoRepository;
@@ -38,7 +40,7 @@ public class ProcessoController {
 
     public ProcessoController(ProcessoService processoService,
                               HistoricoProcessoRepository historicoRepository,
-                              DocumentoService documentoService, PagamentoService pagamentoService, RegistroEntregaService registroEntregaService, ValidacaoRecebimentoRepository validacaoRecebimentoRepository, PagamentoRepository pagamentoRepository) {
+                              DocumentoService documentoService, PagamentoService pagamentoService, RegistroEntregaService registroEntregaService, ValidacaoRecebimentoRepository validacaoRecebimentoRepository, PagamentoRepository pagamentoRepository, UsuarioRepository usuarioRepository, SetorRepository setorRepository) {
         this.processoService = processoService;
         this.historicoRepository = historicoRepository;
         this.documentoService = documentoService;
@@ -46,16 +48,54 @@ public class ProcessoController {
         this.registroEntregaService = registroEntregaService;
         this.validacaoRecebimentoRepository = validacaoRecebimentoRepository;
         this.pagamentoRepository = pagamentoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.setorRepository = setorRepository;
     }
 
     @GetMapping
-    public String listarProcessos(Model model, HttpSession session) {
-        if (session.getAttribute("usuarioLogado") == null) {
+    public String dashboard(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogado");
+        if (usuario == null) {
             return "redirect:/";
         }
 
+        long qtdAguardandoAnalise = processoRepository.countByEstadoAtual(StatusProcesso.AGUARDANDO_ANALISE);
+        long qtdEmTransito = processoRepository.countByEstadoAtual(StatusProcesso.AGUARDANDO_RECEBIMENTO_EXECUCAO);
+        long qtdPagamento = processoRepository.countByEstadoAtual(StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO);
+
+        model.addAttribute("qtdAguardandoAnalise", qtdAguardandoAnalise);
+        model.addAttribute("qtdEmTransito", qtdEmTransito);
+        model.addAttribute("qtdPagamento", qtdPagamento);
+
         model.addAttribute("processos", processoService.listarTodos());
+
         return "dashboard";
+    }
+
+    @GetMapping("/todos")
+    public String listarTodosProcessos(@RequestParam(required = false) String busca,
+                                       @RequestParam(required = false) StatusProcesso status,
+                                       @RequestParam(required = false) TipoProcesso tipoProcesso,
+                                       @RequestParam(required = false) Long setorId,
+                                       Model model,
+                                       HttpSession session) {
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("processos", processoService.listarComFiltros(usuarioLogado, busca, status, tipoProcesso, setorId));
+        model.addAttribute("usuarioLogado", usuarioLogado);
+        model.addAttribute("statusOptions", StatusProcesso.values());
+        model.addAttribute("tipoProcessoOptions", TipoProcesso.values());
+        model.addAttribute("setores", setorRepository.findAll());
+        model.addAttribute("busca", busca);
+        model.addAttribute("statusSelecionado", status);
+        model.addAttribute("tipoProcessoSelecionado", tipoProcesso);
+        model.addAttribute("setorSelecionado", setorId);
+
+        return "all-process";
     }
 
     @GetMapping("/novo")
@@ -69,14 +109,70 @@ public class ProcessoController {
     }
 
     @PostMapping("/salvar")
-    public String salvarProcesso(@ModelAttribute Processo processo, HttpSession session) {
+    public String salvarProcesso(
+            @ModelAttribute Processo processo,
+            @RequestParam(value = "docMemorial", required = false) MultipartFile docMemorial,
+            @RequestParam("docPabs") MultipartFile docPabs, // Único arquivo obrigatório no front
+            @RequestParam(value = "docMapa", required = false) MultipartFile docMapa,
+            @RequestParam(value = "docPropostas", required = false) MultipartFile docPropostas,
+            @RequestParam(value = "docOutros", required = false) MultipartFile[] docOutros,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) throws IOException {
+
         Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
 
         if (usuarioLogado == null) {
             return "redirect:/";
         }
 
-        processoService.criarProcesso(processo, usuarioLogado.getId());
+        Processo processoSalvo = processoService.criarProcesso(processo, usuarioLogado);
+        String identificador = processoSalvo.getIdentificador();
+
+        if (docPabs != null && !docPabs.isEmpty()) {
+            String caminhoPabs = fileStorageService.salvar(
+                    docPabs, identificador, "requisicao", "pabs"
+            );
+            salvarDocumento(docPabs, caminhoPabs, processoSalvo, usuarioLogado, TipoDocumento.PABS);
+        }
+
+        if (docMemorial != null && !docMemorial.isEmpty()) {
+            String caminhoMemorial = fileStorageService.salvar(
+                    docMemorial, identificador, "requisicao", "memorial"
+            );
+            salvarDocumento(docMemorial, caminhoMemorial, processoSalvo, usuarioLogado, TipoDocumento.MEMORIAL_DESCRITIVO);
+        }
+
+        if (docMapa != null && !docMapa.isEmpty()) {
+            String caminhoMapa = fileStorageService.salvar(
+                    docMapa, identificador, "requisicao", "mapa_cotacao"
+            );
+            salvarDocumento(docMapa, caminhoMapa, processoSalvo, usuarioLogado, TipoDocumento.MAPA_COTACAO);
+        }
+
+        if (docPropostas != null && !docPropostas.isEmpty()) {
+            String caminhoPropostas = fileStorageService.salvar(
+                    docPropostas, identificador, "requisicao", "propostas"
+            );
+            salvarDocumento(docPropostas, caminhoPropostas, processoSalvo, usuarioLogado, TipoDocumento.PROPOSTA);
+        }
+
+        if (docOutros != null) {
+            for (MultipartFile file : docOutros) {
+                if (file != null && !file.isEmpty()) {
+                    String caminhoOutro = fileStorageService.salvar(
+                            file, identificador, "requisicao", "outros"
+                    );
+                    salvarDocumento(file, caminhoOutro, processoSalvo, usuarioLogado, TipoDocumento.OUTRO);
+                }
+            }
+        }
+
+        redirectAttributes.addFlashAttribute(
+                "mensagemSucesso",
+                "Requisição registrada com sucesso! Protocolo gerado: " + identificador
+        );
+
         return "redirect:/processos";
     }
 
@@ -101,13 +197,20 @@ public class ProcessoController {
         );
 
         Double valorPago = pagamentoService.calcularValorPago(processo.getId());
+
+        Double valorTotalSeguro = processo.getValorTotal() != null ? processo.getValorTotal() : 0.0;
+
         Double valorRestante = pagamentoService.calcularValorRestante(
-                processo.getValorTotal(),
+                valorTotalSeguro,
                 processo.getId()
         );
 
         model.addAttribute("valorPago", valorPago);
         model.addAttribute("valorRestante", valorRestante);
+
+        model.addAttribute("usuarios",
+                usuarioRepository.findByCargo(Cargo.FISCAL)
+        );
 
         List<AcaoProcessoDTO> acoes = processoService.resolverAcoes(processo, usuario);
         model.addAttribute("acoes", acoes);
@@ -133,6 +236,78 @@ public class ProcessoController {
         }
 
         return "process-detail";
+    }
+
+    @PostMapping("/{id}/conduzir")
+    public String conduzirCompra(
+            @PathVariable Long id,
+            @RequestParam String valorTotal,
+            @RequestParam TipoAquisicao tipoAquisicao,
+            @RequestParam TipoProcesso tipoProcesso,
+            @RequestParam(required = false) Long fiscalId,
+            @RequestParam(required = false) Boolean solicitarAdiantamento,
+            @RequestParam(value = "autorizacaoCompra", required = false) MultipartFile autorizacaoCompra,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) throws IOException {
+
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogado");
+
+        String valorLimpo = valorTotal.replaceAll("[^0-9,]", "");
+        if (valorLimpo.isBlank()) {
+            throw new RuntimeException("Valor inválido");
+        }
+        Double valorConvertido = Double.parseDouble(valorLimpo.replace(",", "."));
+
+        boolean isAdiantamento = Boolean.TRUE.equals(solicitarAdiantamento);
+
+        Processo processo = processoService.conduzirProcesso(
+                id, valorConvertido, tipoAquisicao, tipoProcesso, fiscalId, isAdiantamento, usuario
+        );
+
+        if (autorizacaoCompra != null && !autorizacaoCompra.isEmpty()) {
+            String caminhoAutorizacao = fileStorageService.salvar(
+                    autorizacaoCompra,
+                    processo.getIdentificador(),
+                    "autorizacoes",
+                    "etapa_conducao",
+                    "autorizacao_compra"
+            );
+            salvarDocumento(autorizacaoCompra, caminhoAutorizacao, processo, usuario, TipoDocumento.AUTORIZACAO_COMPRA);
+        }
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "Compra conduzida com sucesso.");
+        return "redirect:/processos/" + id;
+    }
+
+
+    @PostMapping("/{id}/analise-fiscal")
+    public String analiseFiscal(
+            @PathVariable Long id,
+            @RequestParam(required = false) Boolean solicitarAdiantamento,
+            @RequestParam("autorizacaoCompra") MultipartFile autorizacaoCompra,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) throws IOException {
+
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogado");
+        boolean isAdiantamento = Boolean.TRUE.equals(solicitarAdiantamento);
+
+        Processo processo = processoService.analiseFiscal(id, isAdiantamento, usuario);
+
+        if (autorizacaoCompra != null && !autorizacaoCompra.isEmpty()) {
+            String caminhoAutorizacao = fileStorageService.salvar(
+                    autorizacaoCompra,
+                    processo.getIdentificador(),
+                    "autorizacoes",
+                    "etapa_fiscal",
+                    "autorizacao_fiscal"
+            );
+            salvarDocumento(autorizacaoCompra, caminhoAutorizacao, processo, usuario, TipoDocumento.AUTORIZACAO_COMPRA);
+        }
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "Análise do fiscal concluída com sucesso.");
+        return "redirect:/processos/" + id;
     }
 
     @PostMapping("/solicitar-pagamento")

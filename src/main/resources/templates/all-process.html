@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GasFlow | Todos os Processos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #eef2f6;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #08142d 0%, #142f78 100%);
+        }
+
+        .panel-soft {
+            background: #f7f9fb;
+            border-radius: 32px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .card-soft {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .menu-active {
+            background: rgba(255,255,255,0.12);
+            border-radius: 999px;
+        }
+
+        .input-soft {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .input-soft:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .process-row:hover {
+            background: #f1f5f9;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 12px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<div class="flex min-h-screen">
+
+    <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5 fixed h-full z-20">
+        <div>
+            <div class="mb-10 px-1">
+                <h1 class="text-2xl font-extrabold tracking-tight leading-none">GASFLOW</h1>
+                <p class="text-[9px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1">
+                    Inteligência de Compras
+                </p>
+            </div>
+
+            <div class="mb-5">
+                <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Principal</p>
+
+                <a th:href="@{/processos}"
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="text-sm">◧</span>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="mb-5"
+                 th:if="${usuarioLogado.cargo == T(com.gasflow.gasflow.enums.Cargo).DEMANDANTE}">
+                <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
+
+                <a th:href="@{/processos/novo}"
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="text-sm">◫</span>
+                    <span>Requisições</span>
+                </a>
+            </div>
+
+            <div>
+                <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Dados</p>
+
+                <a th:href="@{/processos/todos}"
+                   class="menu-active flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full transition-colors">
+                    <span class="text-sm">◫</span>
+                    <span>Todos os Processos</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold">
+                    <span th:text="${#strings.substring(usuarioLogado.nome,0,1)}">U</span>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-semibold truncate" th:text="${usuarioLogado.nome}">Usuário</p>
+                    <p class="text-[8px] text-emerald-300 truncate uppercase" th:text="${usuarioLogado.cargo}">CARGO</p>
+                </div>
+            </div>
+
+            <a th:href="@{/logout}"
+               class="text-[8px] uppercase text-red-300 hover:text-red-400 font-bold tracking-wide transition-colors">
+                Encerrar sessão
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-[240px] px-7 py-5">
+        <div class="flex items-start justify-between mb-8">
+            <div>
+                <h2 class="text-[22px] font-extrabold text-slate-800">Todos os Processos</h2>
+                <p class="text-[11px] text-slate-400 font-medium">Consulta centralizada com filtros por perfil e etapa do fluxo.</p>
+            </div>
+        </div>
+
+        <section class="card-soft p-6 mb-8 border border-slate-100">
+            <form th:action="@{/processos/todos}" method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                <div class="xl:col-span-2">
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2">Busca</label>
+                    <input type="text"
+                           name="busca"
+                           th:value="${busca}"
+                           class="input-soft w-full"
+                           placeholder="Título, identificador ou demandante">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2">Status</label>
+                    <select name="status" class="input-soft w-full text-sm">
+                        <option value="">Todos</option>
+                        <option th:each="statusItem : ${statusOptions}"
+                                th:value="${statusItem.name()}"
+                                th:text="${statusItem}"
+                                th:selected="${statusSelecionado == statusItem}">
+                            STATUS
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2">Tipo</label>
+                    <select name="tipoProcesso" class="input-soft w-full text-sm">
+                        <option value="">Todos</option>
+                        <option th:each="tipoItem : ${tipoProcessoOptions}"
+                                th:value="${tipoItem.name()}"
+                                th:text="${tipoItem}"
+                                th:selected="${tipoProcessoSelecionado == tipoItem}">
+                            TIPO
+                        </option>
+                    </select>
+                </div>
+
+                <div th:if="${usuarioLogado.cargo != T(com.gasflow.gasflow.enums.Cargo).DEMANDANTE}">
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2">Setor</label>
+                    <select name="setorId" class="input-soft w-full text-sm">
+                        <option value="">Todos</option>
+                        <option th:each="setor : ${setores}"
+                                th:value="${setor.id}"
+                                th:text="${setor.sigla + ' - ' + setor.nome}"
+                                th:selected="${setorSelecionado != null and setorSelecionado == setor.id}">
+                            SETOR
+                        </option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 xl:col-span-5 flex flex-wrap gap-3 justify-end mt-2">
+                    <a th:href="@{/processos/todos}"
+                       class="bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wide transition-colors">
+                        Limpar
+                    </a>
+                    <button type="submit"
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wide shadow-md shadow-emerald-200 transition-transform hover:scale-105">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel-soft p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-extrabold text-slate-800">Resultados</h3>
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider"
+                      th:text="${#lists.size(processos) + ' processo(s) encontrados'}">0 processo(s) encontrados</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(processos)}" class="text-center text-slate-400 py-10 font-medium">
+                Nenhum processo encontrado com os filtros informados.
+            </div>
+
+            <a th:each="p : ${processos}"
+               th:href="@{/processos/{id}(id=${p.id})}"
+               class="block process-row p-5 bg-white mb-3 rounded-xl border border-slate-100 transition-colors">
+                <div class="flex justify-between items-center gap-4">
+                    <div>
+                        <p class="text-sm font-extrabold text-slate-800" th:if="${p.titulo != null}" th:text="${p.titulo}"></p>
+                        <p class="text-sm font-extrabold text-slate-400 italic" th:if="${p.titulo == null}">Sem Título</p>
+
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wide flex flex-wrap items-center gap-2 mt-1">
+                            <span th:text="${p.identificador}">PROC-0001</span>
+                            <span class="text-slate-300">•</span>
+
+                            <span th:if="${p.tipoProcesso != null}" th:text="${p.tipoProcesso}"></span>
+                            <span th:if="${p.tipoProcesso == null}">A CLASSIFICAR</span>
+                            <span class="text-slate-300">•</span>
+
+                            <span class="text-emerald-600" th:if="${p.setorDemandante != null and p.setorDemandante.setor != null}" th:text="${p.setorDemandante.setor.sigla}"></span>
+                            <span class="text-emerald-600" th:if="${p.setorDemandante == null or p.setorDemandante.setor == null}">SEM SETOR</span>
+                            <span class="text-slate-300">•</span>
+
+                            <span th:if="${p.setorDemandante != null}" th:text="${p.setorDemandante.nome}"></span>
+                            <span th:if="${p.setorDemandante == null}">Autor Desconhecido</span>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <div class="mb-1">
+                            <span class="status-pill"
+                                  th:if="${p.estadoAtual != null}"
+                                  th:classappend="
+                                    ${p.estadoAtual.name() == 'AGUARDANDO_ANALISE'} ? ' bg-yellow-100 text-yellow-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_RECEBIMENTO_EXECUCAO'} ? ' bg-cyan-100 text-cyan-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_SOLICITACAO_PAGAMENTO'} ? ' bg-amber-100 text-amber-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_AUTORIZACAO_PAGAMENTO'} ? ' bg-indigo-100 text-indigo-700' :
+                                    (${p.estadoAtual.name() == 'AGUARDANDO_EXECUCAO_PAGAMENTO'} ? ' bg-purple-100 text-purple-700' :
+                                    (${p.estadoAtual.name() == 'FINALIZADO'} ? ' bg-emerald-100 text-emerald-700' :
+                                    ' bg-gray-100 text-gray-700'))))))"
+                                  th:text="${p.estadoAtual.name()}">
+                            </span>
+
+                            <span class="status-pill bg-rose-100 text-rose-700" th:if="${p.estadoAtual == null}">
+                                ERRO: SEM STATUS
+                            </span>
+                        </div>
+
+                        <div class="text-sm font-bold text-slate-700">
+                            <span th:if="${p.valorTotal != null}" th:text="${'R$ ' + #numbers.formatDecimal(p.valorTotal,1,'POINT',2,'COMMA')}"></span>
+                            <span th:if="${p.valorTotal == null}">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

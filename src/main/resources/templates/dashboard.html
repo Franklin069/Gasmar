@@ -42,8 +42,7 @@
 
 <div class="flex min-h-screen">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5">
+    <aside class="sidebar w-[240px] text-white flex flex-col justify-between py-6 px-5 fixed h-full z-20">
         <div>
             <div class="mb-10 px-1">
                 <h1 class="text-2xl font-extrabold tracking-tight leading-none">GASFLOW</h1>
@@ -62,38 +61,38 @@
                 </a>
             </div>
 
-            <div class="mb-5">
+            <div class="mb-5" th:if="${session.usuarioLogado != null and session.usuarioLogado.cargo.name() == 'DEMANDANTE'}">
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Operações</p>
 
                 <a th:href="@{/processos/novo}"
-                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10">
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 mb-2 rounded-full hover:bg-white/10 transition-colors">
                     <span class="text-sm">◫</span>
-                    <span>Requisições</span>
+                    <span>Realizar Requisição</span>
                 </a>
             </div>
 
             <div>
                 <p class="text-[8px] uppercase text-white/50 font-bold mb-3 px-2">Dados</p>
 
-                <a th:href="@{/processos}"
-                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full hover:bg-white/10">
+                <a th:href="@{/processos/todos}"
+                   class="flex items-center gap-2 text-[11px] font-semibold px-3 py-3 rounded-full hover:bg-white/10 transition-colors">
                     <span class="text-sm">◫</span>
                     <span>Todos os Processos</span>
                 </a>
             </div>
         </div>
 
-        <div class="bg-white/10 rounded-2xl p-3">
+        <div class="bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold">
+                <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold shadow-inner">
                     <span th:text="${session.usuarioLogado != null ? #strings.substring(session.usuarioLogado.nome,0,1) : 'U'}">U</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-[10px] font-semibold truncate"
+                    <p class="text-[10px] font-semibold truncate text-white"
                        th:text="${session.usuarioLogado != null ? session.usuarioLogado.nome : 'Usuário'}">
                         Usuário
                     </p>
-                    <p class="text-[8px] text-emerald-300 truncate"
+                    <p class="text-[8px] text-emerald-300 truncate uppercase"
                        th:text="${session.usuarioLogado != null ? session.usuarioLogado.setor.sigla : 'Perfil'}">
                         Perfil
                     </p>
@@ -101,70 +100,55 @@
             </div>
 
             <a th:href="@{/logout}"
-               class="text-[8px] uppercase text-red-300 font-bold tracking-wide">
+               class="text-[8px] uppercase text-red-300 hover:text-red-400 font-bold tracking-wide transition-colors">
                 Encerrar sessão
             </a>
         </div>
     </aside>
 
-    <!-- CONTEÚDO -->
-    <main class="flex-1 px-7 py-5">
+    <main class="flex-1 ml-[240px] px-8 py-8">
         <div class="flex items-start justify-between mb-8">
             <div>
                 <h2 class="text-[22px] font-extrabold text-slate-800">Monitor de Estados</h2>
                 <p class="text-[11px] text-slate-400 font-medium">Acompanhamento centralizado.</p>
             </div>
 
-            <a th:href="@{/processos/novo}"
-               class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-bold px-8 py-4 rounded-2xl shadow-lg">
+            <a th:if="${session.usuarioLogado != null and session.usuarioLogado.cargo.name() == 'DEMANDANTE'}"
+               th:href="@{/processos/novo}"
+               class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-bold px-8 py-4 rounded-2xl shadow-lg transition-transform hover:scale-105">
                 + Nova PABS
             </a>
         </div>
 
-        <!-- CARDS SEM DADOS FICTÍCIOS -->
         <div class="grid grid-cols-1 xl:grid-cols-4 gap-5 mb-8">
+
             <div class="card-soft border border-emerald-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-emerald-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Aguardando Compra
+                <div class="text-emerald-600 text-lg font-extrabold leading-none" th:text="${qtdAguardandoAnalise != null ? qtdAguardandoAnalise : '0'}">0</div>
+                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3 text-center">
+                    Aguardando Análise
                 </div>
             </div>
 
             <div class="card-soft border border-blue-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-blue-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Em Trânsito
+                <div class="text-blue-600 text-lg font-extrabold leading-none" th:text="${qtdEmTransito != null ? qtdEmTransito : '0'}">0</div>
+                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3 text-center">
+                    Execução / Trânsito
                 </div>
             </div>
 
             <div class="card-soft border border-amber-400 p-6 min-h-[96px] flex flex-col items-center justify-center">
-                <div class="text-amber-600 text-lg font-extrabold leading-none">--</div>
-                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3">
-                    Validar Nota
+                <div class="text-amber-600 text-lg font-extrabold leading-none" th:text="${qtdPagamento != null ? qtdPagamento : '0'}">0</div>
+                <div class="text-[8px] font-bold uppercase tracking-wide text-slate-400 mt-3 text-center">
+                    Aguardando Pagamento
                 </div>
             </div>
 
-            <div class="card-soft border-l-4 border-emerald-500 p-6 min-h-[96px]">
-                <div class="flex justify-between items-start mb-5">
-                    <p class="text-[9px] font-extrabold tracking-[0.2em] uppercase text-slate-700">
-                        Avisos Rápidos
-                    </p>
-                    <span class="bg-emerald-500 text-white text-[8px] font-bold rounded-full px-2 py-1">
-                        --
-                    </span>
-                </div>
-
-                <div class="bg-emerald-50 rounded-2xl text-center py-4 text-[9px] font-bold text-emerald-700">
-                    Ver Painel Completo
-                </div>
-            </div>
         </div>
 
-        <!-- LISTA REAL VINDO DO BACKEND -->
         <section class="panel-soft p-6 min-h-[250px]">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-[24px] xl:text-[18px] font-extrabold text-slate-800">Processos em Foco</h3>
-                <a th:href="@{/processos}" class="text-[10px] font-bold text-emerald-600">Ver Todos</a>
+                <h3 class="text-[24px] xl:text-[18px] font-extrabold text-slate-800">Processos</h3>
+                <a th:href="@{/processos}" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors">Ver Todos</a>
             </div>
 
             <div th:if="${#lists.isEmpty(processos)}"
@@ -175,7 +159,7 @@
             <div th:if="${!#lists.isEmpty(processos)}" class="space-y-3">
                 <a th:each="p : ${processos}"
                    th:href="@{/processos/{id}(id=${p.id})}"
-                   class="process-row block bg-white rounded-2xl px-5 py-4 border border-slate-100 transition">
+                   class="process-row block bg-white rounded-2xl px-5 py-4 border border-slate-100 transition-colors">
                     <div class="flex items-center justify-between gap-4">
                         <div>
                             <p class="text-sm font-extrabold text-slate-800" th:text="${p.titulo}">Título</p>
@@ -190,8 +174,8 @@
 
                         <div class="text-right">
                             <p class="text-sm font-bold text-slate-700"
-                               th:text="${#numbers.formatDecimal(p.valorTotal,1,'POINT',2,'COMMA')}">
-                                0,00
+                               th:text="${p.valorTotal != null ? 'R$ ' + #numbers.formatDecimal(p.valorTotal,1,'POINT',2,'COMMA') : 'R$ 0,00'}">
+                                R$ 0,00
                             </p>
                             <p class="text-[10px] uppercase font-black text-emerald-600"
                                th:text="${p.estadoAtual.descricao}">

@@ -7,12 +7,15 @@ import com.gasflow.gasflow.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessoService {
@@ -24,6 +27,9 @@ public class ProcessoService {
     private final PagamentoService pagamentoService;
     private final RegistroEntregaRepository registroEntregaRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public ProcessoService(ProcessoRepository processoRepository, UsuarioRepository usuarioRepository, PagamentoRepository pagamentoRepository, HistoricoProcessoRepository historicoProcessoRepositoryRepository, PagamentoService pagamentoService, RegistroEntregaRepository registroEntregaRepository) {
         this.processoRepository = processoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -33,13 +39,12 @@ public class ProcessoService {
         this.registroEntregaRepository = registroEntregaRepository;
     }
 
-    public Processo criarProcesso(Processo processo, Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
+    @Transactional
+    public Processo criarProcesso(Processo processo, Usuario demandante) {
         processo.setIdentificador(gerarIdentificador());
+
+        processo.setSetorDemandante(demandante);
         processo.setEstadoAtual(StatusProcesso.AGUARDANDO_ANALISE);
-        processo.setSetorDemandante(usuario);
 
         return processoRepository.save(processo);
     }
@@ -53,8 +58,63 @@ public class ProcessoService {
                 .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
     }
 
-    private String gerarIdentificador() {
-        return "PROC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    public synchronized String gerarIdentificador() {
+        int anoAtual = Year.now().getValue();
+        String sufixoAno = "-" + anoAtual;
+
+        String ultimoIdentificador = processoRepository.findMaxIdentificadorByAno(sufixoAno);
+
+        int proximoNumero = 1;
+
+        if (ultimoIdentificador != null) {
+            String numeroStr = ultimoIdentificador.split("-")[0];
+            proximoNumero = Integer.parseInt(numeroStr) + 1;
+        }
+
+        return String.format("%03d-%d", proximoNumero, anoAtual);
+    }
+
+    public List<Processo> listarPorUsuario(Usuario usuario) {
+        if (usuario.getCargo() == Cargo.DEMANDANTE) {
+            return processoRepository.findBySetorDemandanteOrderByIdDesc(usuario);
+        }
+        return processoRepository.findAllByOrderByIdDesc();
+    }
+
+    public List<Processo> listarComFiltros(Usuario usuario,
+                                           String busca,
+                                           StatusProcesso status,
+                                           com.gasflow.gasflow.enums.TipoProcesso tipoProcesso,
+                                           Long setorId) {
+        return listarPorUsuario(usuario).stream()
+                .filter(processo -> filtroBusca(processo, busca))
+                .filter(processo -> status == null || processo.getEstadoAtual() == status)
+                .filter(processo -> tipoProcesso == null || processo.getTipoProcesso() == tipoProcesso)
+                .filter(processo -> filtroSetor(usuario, processo, setorId))
+                .collect(Collectors.toList());
+    }
+
+    private boolean filtroBusca(Processo processo, String busca) {
+        if (busca == null || busca.isBlank()) {
+            return true;
+        }
+
+        String termo = busca.trim().toLowerCase();
+        return processo.getTitulo().toLowerCase().contains(termo)
+                || processo.getIdentificador().toLowerCase().contains(termo)
+                || (processo.getSetorDemandante() != null
+                && processo.getSetorDemandante().getNome() != null
+                && processo.getSetorDemandante().getNome().toLowerCase().contains(termo));
+    }
+
+    private boolean filtroSetor(Usuario usuario, Processo processo, Long setorId) {
+        if (usuario.getCargo() == Cargo.DEMANDANTE || setorId == null) {
+            return true;
+        }
+
+        return processo.getSetorDemandante() != null
+                && processo.getSetorDemandante().getSetor() != null
+                && setorId.equals(processo.getSetorDemandante().getSetor().getId());
     }
 
     public List<AcaoProcessoDTO> resolverAcoes(Processo processo, Usuario usuario) {
@@ -74,9 +134,17 @@ public class ProcessoService {
         switch (processo.getEstadoAtual()) {
 
             case AGUARDANDO_ANALISE:
-                if ("GERAF".equalsIgnoreCase(setorUsuario)) {
+
+                if ("GERAF".equalsIgnoreCase(setorUsuario) && processo.getFiscal() == null) {
                     acoes.add(new AcaoProcessoDTO("ANALISE_PROCESSO"));
                 }
+
+                if (processo.getFiscal() != null &&
+                        processo.getFiscal().getId().equals(usuario.getId())) {
+
+                    acoes.add(new AcaoProcessoDTO("ANALISE_FISCAL"));
+                }
+
                 break;
 
             case AGUARDANDO_RECEBIMENTO_EXECUCAO:
@@ -131,6 +199,80 @@ public class ProcessoService {
         }
 
         return acoes;
+    }
+
+    @Transactional
+    public Processo conduzirProcesso(
+            Long processoId, Double valorTotal, TipoAquisicao tipoAquisicao,
+            TipoProcesso tipoProcesso, Long fiscalId, boolean solicitarAdiantamento, Usuario usuarioLogado
+    ) {
+        Processo processo = processoRepository.findById(processoId)
+                .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
+
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        processo.setValorTotal(valorTotal);
+        processo.setTipoAquisicao(tipoAquisicao);
+        processo.setTipoProcesso(tipoProcesso);
+
+        if (fiscalId != null) {
+            Usuario fiscal = usuarioRepository.findById(fiscalId)
+                    .orElseThrow(() -> new RuntimeException("Fiscal não encontrado"));
+
+            processo.setFiscal(fiscal);
+            processo.setEstadoAtual(StatusProcesso.AGUARDANDO_ANALISE);
+        } else {
+            processo.setFiscal(null);
+
+            if (solicitarAdiantamento) {
+                processo.setEstadoAtual(StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO);
+            } else {
+                processo.setEstadoAtual(StatusProcesso.AGUARDANDO_RECEBIMENTO_EXECUCAO);
+            }
+        }
+
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(processo.getEstadoAtual());
+        historico.setDataTransicao(LocalDateTime.now());
+        historico.setObservacao("Compra realizada pela GERAF");
+        historico.setProcesso(processo);
+        historico.setUsuario(usuarioLogado);
+
+        historicoProcessoRepositoryRepository.save(historico);
+
+        return processo;
+    }
+
+
+    @Transactional
+    public Processo analiseFiscal(Long processoId, boolean solicitarAdiantamento, Usuario usuarioLogado) {
+        Processo processo = processoRepository.findById(processoId)
+                .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
+
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        if (solicitarAdiantamento) {
+            processo.setEstadoAtual(StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO);
+        } else {
+            processo.setEstadoAtual(StatusProcesso.AGUARDANDO_RECEBIMENTO_EXECUCAO);
+        }
+
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(processo.getEstadoAtual());
+        historico.setDataTransicao(LocalDateTime.now());
+        historico.setObservacao("Análise do fiscal concluída");
+        historico.setProcesso(processo);
+        historico.setUsuario(usuarioLogado);
+
+        historicoProcessoRepositoryRepository.save(historico);
+
+        return processo;
     }
 
     @Transactional

@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-
 <div th:fragment="conteudo">
 
     <div class="mb-4">
@@ -9,118 +5,173 @@
             Análise e Condução da Compra
         </h4>
         <p class="text-[10px] text-slate-500 mt-1 font-medium italic">
-            Classifique o processo, defina os encaminhamentos e anexe a autorização (se houver).
+            Classifique o processo e defina os encaminhamentos
         </p>
     </div>
 
     <hr class="border-slate-100 mb-5">
 
-    <form id="gerafForm" th:action="@{/processos/{id}/conduzir(id=${processo.id})}" method="POST" enctype="multipart/form-data" class="space-y-5">
+    <form id="gerafForm"
+          th:action="@{/processos/{id}/conduzir(id=${processo.id})}"
+          method="POST"
+          enctype="multipart/form-data"
+          class="space-y-5">
+
+        <input type="hidden" name="solicitarAdiantamento" id="adiantamentoInput">
 
         <div>
-            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">Tipo de Aquisição</label>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Valor Total do Processo
+            </label>
+            <input type="text" name="valorTotal" placeholder="Ex: 12.000,00" class="w-full p-2 border rounded-xl text-sm" required>
+        </div>
+
+        <div>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Tipo de Aquisição
+            </label>
             <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                    <input type="radio" name="tipoAquisicao" value="CPV" class="w-3.5 h-3.5 text-blue-600" required>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoAquisicao" value="CPV" required>
                     <span class="ml-2 text-xs font-bold text-slate-700">CPV</span>
                 </label>
-                <label class="flex items-center p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                    <input type="radio" name="tipoAquisicao" value="CONTRATO" class="w-3.5 h-3.5 text-blue-600" required>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoAquisicao" value="CONTRATO" required>
                     <span class="ml-2 text-xs font-bold text-slate-700">Contrato</span>
                 </label>
             </div>
         </div>
 
         <div>
-            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">Natureza do Processo</label>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Natureza do Processo
+            </label>
             <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                    <input type="radio" name="tipoProcesso" value="COMPRA_BEM" class="w-3.5 h-3.5 text-blue-600" required>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoProcesso" value="COMPRA_BEM" required>
                     <span class="ml-2 text-xs font-bold text-slate-700">Compra de Bem</span>
                 </label>
-                <label class="flex items-center p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                    <input type="radio" name="tipoProcesso" value="CONTRATACAO_SERVICO" class="w-3.5 h-3.5 text-blue-600" required>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoProcesso" value="CONTRATACAO_SERVICO" required>
                     <span class="ml-2 text-xs font-bold text-slate-700">Contratação de Serviço</span>
                 </label>
             </div>
         </div>
 
         <div id="fiscal-field" class="hidden">
-            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">Definir Fiscal do Contrato</label>
-            <select name="fiscalId" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:ring-2 focus:ring-emerald-400 focus:outline-none">
-                <option value="">Selecione um fiscal...</option>
-                <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nome}"></option>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Definir Fiscal
+            </label>
+            <select name="fiscalId" class="w-full p-2 border rounded-xl text-sm text-slate-700">
+                <option value="">Selecione...</option>
+                <option th:each="usuario : ${usuarios}"
+                        th:value="${usuario.id}"
+                        th:text="${usuario.nome}">
+                </option>
             </select>
-            <p class="text-[9px] text-slate-400 mt-1">O fiscal será notificado para acompanhamento do contrato</p>
         </div>
 
-        <div>
-            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">Autorização de Compra (Opcional)</label>
-            <input type="file" name="autorizacaoCompra" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                   class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
-            <p class="text-[9px] text-slate-400 mt-1">Anexe a autorização para avançar o processo no mesmo envio.</p>
+        <div id="autorizacao-field">
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Autorização
+            </label>
+            <input type="file" name="autorizacaoCompra" class="w-full p-2 border rounded-xl text-xs text-slate-600">
         </div>
 
-        <div class="flex flex-col md:flex-row gap-3 pt-2">
-            <button type="button" onclick="abrirModalInconformidade()"
-                    class="flex-1 px-5 py-2.5 rounded-xl border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center">
+        <div class="flex gap-3 mt-4">
+            <button type="button"
+                    onclick="abrirModalInconformidade()"
+                    class="flex-1 border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all rounded-xl py-2.5 flex items-center justify-center">
                 <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
             </button>
 
-            <button type="button" onclick="abrirModalConfirmacaoGeraf()"
-                    class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] px-5 py-2.5 rounded-xl font-bold shadow-md shadow-emerald-200 transition-all hover:scale-[1.02] flex items-center justify-center">
-                <i class="bi bi-send-fill mr-2"></i> Conduzir Processo
+            <button type="button"
+                    onclick="abrirModalConfirmacaoGeraf()"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold shadow-md shadow-emerald-200 transition-all rounded-xl py-2.5">
+                Conduzir
             </button>
         </div>
+
     </form>
 
-    <div id="modalConfirmacaoGeraf" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity p-4">
-        <div class="bg-white rounded-[20px] p-6 w-full max-w-[340px] shadow-2xl text-center">
-
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-50 mb-4 border border-emerald-100 shadow-sm">
-                <i class="bi bi-check-lg text-emerald-500 text-2xl"></i>
-            </div>
-
+    <div id="modalConfirmacaoGeraf"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
             <h2 class="text-base font-extrabold text-slate-800 mb-2">
                 Confirmar Condução
             </h2>
             <p class="text-xs text-slate-500 mb-6 font-medium px-2">
-                Você deseja confirmar as classificações e prosseguir com a condução da compra?
+                Você deseja confirmar a classificação e prosseguir?
             </p>
-
-            <div class="flex items-center justify-center space-x-2">
+            <div class="flex items-center justify-center space-x-3">
                 <button type="button" onclick="fecharModalConfirmacaoGeraf()"
-                        class="px-5 py-2.5 text-[11px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
                     Cancelar
                 </button>
-                <button type="button" onclick="enviarFormularioGeraf()"
-                        class="px-5 py-2.5 bg-emerald-500 text-white text-[11px] font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                <button type="button" onclick="abrirModalAdiantamento()"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
                     Confirmar
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Mostra o Select do Fiscal apenas se a modalidade for Contrato
-        const radiosAquisicao = document.querySelectorAll('input[name="tipoAquisicao"]');
-        const fieldFiscal = document.getElementById('fiscal-field');
-        const selectFiscal = fieldFiscal.querySelector('select');
+    <div id="modalAdiantamento"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Solicitar Adiantamento?
+            </h2>
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                O processo requer um adiantamento de pagamento?
+            </p>
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" onclick="enviarComAdiantamento(false)"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Não
+                </button>
+                <button type="button" onclick="enviarComAdiantamento(true)"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Sim
+                </button>
+            </div>
+        </div>
+    </div>
 
-        radiosAquisicao.forEach(radio => {
-            radio.addEventListener('change', function() {
+    <script>
+        // -- Controle de Interface --
+        const radios = document.querySelectorAll('input[name="tipoAquisicao"]');
+        const fiscalField = document.getElementById('fiscal-field');
+        const autorizacaoField = document.getElementById('autorizacao-field');
+
+        radios.forEach(r => {
+            r.addEventListener('change', function () {
                 if (this.value === 'CONTRATO') {
-                    fieldFiscal.classList.remove('hidden');
-                    selectFiscal.setAttribute('required', 'true');
+                    fiscalField.classList.remove('hidden');
+                    autorizacaoField.classList.add('hidden');
                 } else {
-                    fieldFiscal.classList.add('hidden');
-                    selectFiscal.removeAttribute('required');
+                    fiscalField.classList.add('hidden');
+                    autorizacaoField.classList.remove('hidden');
                 }
             });
         });
+
+        function abrirModalConfirmacaoGeraf() {
+            if(document.getElementById("gerafForm").reportValidity()){
+                document.getElementById("modalConfirmacaoGeraf").classList.remove("hidden");
+                document.getElementById("modalConfirmacaoGeraf").classList.add("flex");
+            }
+        }
+
+        function fecharModalConfirmacaoGeraf() {
+            document.getElementById("modalConfirmacaoGeraf").classList.add("hidden");
+            document.getElementById("modalConfirmacaoGeraf").classList.remove("flex");
+        }
+
+        function enviarComAdiantamento(valor) {
+            document.getElementById("adiantamentoInput").value = valor;
+            document.getElementById("gerafForm").submit();
+        }
     </script>
 
 </div>
-
-</body>
-</html>
