@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conteudo">
+
+    <!-- RESUMO FINANCEIRO -->
+    <div>
+        <h3 class="text-xs font-bold text-slate-700 mb-2 uppercase">
+            Resumo Financeiro
+        </h3>
+
+        <div class="grid grid-cols-3 gap-4">
+
+            <!-- Valor Total -->
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 uppercase">Valor Total</p>
+                <p class="text-sm font-bold text-slate-800 mt-1"
+                   th:text="'R$ ' + ${#numbers.formatDecimal(processo.valorTotal, 1, 'POINT', 2, 'COMMA')}">
+                </p>
+            </div>
+
+            <!-- Valor Pago -->
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 uppercase">Valor Pago</p>
+                <p class="text-sm font-bold text-emerald-600 mt-1"
+                   th:text="'R$ ' + ${#numbers.formatDecimal(valorPago != null ? valorPago : 0, 1, 'POINT', 2, 'COMMA')}">
+                </p>
+            </div>
+
+            <!-- Valor Restante -->
+            <div class="bg-red-50 p-3 rounded-lg border border-red-300">
+                <p class="text-[11px] text-red-600 uppercase">Valor Restante</p>
+                <p id="saldoRestante"
+                   class="text-base font-extrabold text-red-700 mt-1"
+                   th:text="'R$ ' + ${#numbers.formatDecimal(valorRestante != null ? valorRestante : 0, 1, 'POINT', 2, 'COMMA')}">
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <form th:action="@{/processos/solicitar-pagamento}"
+          method="post"
+          enctype="multipart/form-data"
+          class="space-y-6 mt-6">
+
+        <input type="hidden" name="processoId" th:value="${processo.id}" />
+
+        <!-- Valor -->
+        <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+                Valor a Solicitar*
+            </label>
+
+            <input type="text"
+                   name="valor"
+                   oninput="maskMoney(this)"
+                   placeholder="R$ 0,00"
+                   required
+                   inputmode="numeric"
+                   class="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm text-slate-700 shadow-sm">
+
+            <div class="mt-3 flex items-center space-x-2">
+                <input type="checkbox"
+                       name="adiantamento"
+                       class="w-4 h-4 rounded border-slate-300 accent-emerald-500 cursor-pointer">
+                <label class="text-xs font-semibold text-slate-600 cursor-pointer">
+                    Essa solicitação corresponde a um adiantamento?
+                </label>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- NOTA FISCAL -->
+            <div onclick="document.getElementById('notaFiscal').click()"
+                 class="upload-box border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-slate-50 cursor-pointer hover:border-emerald-500 transition">
+
+                <i class="bi bi-receipt text-2xl text-blue-600 mb-1"></i>
+
+                <p class="text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Nota Fiscal*
+                </p>
+
+                <p id="notaFiscalNome" class="text-[10px] text-slate-500">
+                    Clique para selecionar PDF
+                </p>
+
+                <input type="file"
+                       id="notaFiscal"
+                       name="notaFiscal"
+                       accept="application/pdf"
+                       required
+                       class="hidden"
+                       onchange="updateFileName(this, 'notaFiscalNome')">
+            </div>
+
+            <!-- BOLETO -->
+            <div onclick="document.getElementById('boleto').click()"
+                 class="upload-box border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-slate-50 cursor-pointer hover:border-emerald-500 transition">
+
+                <i class="bi bi-file-earmark-text text-2xl text-amber-500 mb-1"></i>
+
+                <p class="text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Boleto*
+                </p>
+
+                <p id="boletoNome" class="text-[10px] text-slate-500">
+                    Clique para selecionar PDF
+                </p>
+
+                <input type="file"
+                       id="boleto"
+                       name="boleto"
+                       accept="application/pdf"
+                       required
+                       class="hidden"
+                       onchange="updateFileName(this, 'boletoNome')">
+            </div>
+
+            <!-- OUTROS -->
+            <div onclick="document.getElementById('outros').click()"
+                 class="upload-box border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-slate-50 cursor-pointer hover:border-emerald-500 transition">
+
+                <i class="bi bi-folder text-2xl text-slate-600 mb-1"></i>
+
+                <p class="text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Outros Documentos
+                </p>
+
+                <p id="outrosNome" class="text-[10px] text-slate-500">
+                    Clique para selecionar arquivos
+                </p>
+
+                <input type="file"
+                       id="outros"
+                       name="outrosDocumentos"
+                       multiple
+                       class="hidden"
+                       onchange="updateFileName(this, 'outrosNome')">
+            </div>
+
+        </div>
+
+        <!-- Botões -->
+        <div class="flex justify-end space-x-3 pt-3">
+            <button type="button"
+                    onclick="history.back()"
+                    class="px-4 py-2 text-slate-500 text-sm font-bold hover:text-slate-700">
+                Cancelar
+            </button>
+
+            <button type="submit"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow">
+                Solicitar Pagamento
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- SCRIPTS -->
+<script>
+    function maskMoney(input) {
+        let value = input.value.replace(/\D/g, "");
+
+        if (value.length === 0) {
+            input.value = "";
+            return;
+        }
+
+        // Garante pelo menos 3 dígitos (ex: 1 → 0,01)
+        while (value.length < 3) {
+            value = "0" + value;
+        }
+
+        let integerPart = value.slice(0, -2);
+        let decimalPart = value.slice(-2);
+
+        // Adiciona separador de milhar
+        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        input.value = "R$ " + integerPart + "," + decimalPart;
+    }
+</script>
+
+</body>
+</html>

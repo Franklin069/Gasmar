@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GasFlow | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #0f172b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background-color: #d1d5db;
+            border-radius: 2.5rem;
+            width: 90%;
+            max-width: 380px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-field {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            border: none;
+            padding: 1rem 1.25rem;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .login-field:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-gasflow {
+            background-color: #10b981;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-weight: 700;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-gasflow:hover {
+            background-color: #059669;
+        }
+    </style>
+</head>
+<body>
+
+<main class="login-card">
+    <header class="text-center mb-10">
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tighter uppercase italic mb-6">
+            GAS<span class="text-emerald-500">FLOW</span>
+        </h1>
+        <p class="text-slate-600 font-semibold text-sm">Portal Interno de Suprimentos</p>
+    </header>
+
+    <!-- FORM REAL -->
+    <form method="post" th:action="@{/login}" class="space-y-4">
+
+        <div class="space-y-1">
+            <label class="text-slate-700 font-bold text-xs ml-1">
+                Credenciais Corporativas
+            </label>
+
+            <input type="text"
+                   name="login"
+                   class="login-field w-full"
+                   placeholder="Usuário"
+                   required>
+        </div>
+
+        <div class="space-y-1">
+            <input type="password"
+                   name="senha"
+                   class="login-field w-full"
+                   placeholder="Senha"
+                   required>
+        </div>
+
+        <!-- ERRO -->
+        <p th:if="${erro}"
+           th:text="${erro}"
+           class="text-red-600 text-sm font-semibold text-center"></p>
+
+        <div class="pt-2">
+            <button type="submit" class="btn-gasflow">
+                Entrar no Sistema
+            </button>
+        </div>
+
+    </form>
+
+    <footer class="text-center mt-12">
+        <p class="text-slate-500 text-[9px] font-bold uppercase tracking-[0.3em] opacity-60">
+            Exclusivo Gasmar
+        </p>
+    </footer>
+</main>
+
+</body>
+</html>

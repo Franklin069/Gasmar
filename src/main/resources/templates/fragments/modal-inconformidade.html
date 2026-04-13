@@ -1,0 +1,53 @@
+<div th:fragment="modal">
+
+    <div id="modalInconformidade"
+         class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-6">
+
+        <div class="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl p-10">
+
+            <div class="flex items-start space-x-4 mb-6">
+                <div class="bg-rose-100 p-4 rounded-2xl">
+                    <i class="bi bi-exclamation-triangle-fill text-rose-600 text-3xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">
+                        Reportar Não-Conformidade
+                    </h2>
+                </div>
+            </div>
+
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                Motivo da Não-Conformidade*
+            </label>
+
+            <textarea id="motivoInconformidade"
+                      rows="5"
+                      class="w-full p-5 rounded-2xl border border-rose-300 focus:ring-2 focus:ring-rose-500 outline-none text-slate-700"
+                      placeholder="Descreva o problema..."></textarea>
+
+            <form id="formInconformidade"
+                  method="POST"
+                  th:action="@{/processos/inconformidade}">
+
+                <input type="hidden" name="processoId" th:value="${processo.id}">
+                <input type="hidden" name="motivo" id="motivoHidden">
+            </form>
+
+            <div class="flex justify-end space-x-4 mt-8">
+
+                <button onclick="fecharModalInconformidade()"
+                        class="px-6 py-3 font-bold text-slate-500">
+                    Cancelar
+                </button>
+
+                <button onclick="confirmarInconformidade()"
+                        class="px-8 py-3 bg-rose-600 text-white rounded-xl font-bold">
+                    Confirmar
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

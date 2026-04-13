@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body style="margin:0;padding:0;background:#eef2f6;font-family:'Segoe UI',Arial,sans-serif;color:#0f172a;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef2f6;padding:24px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 20px 40px rgba(15,23,42,0.10);">
+                <tr>
+                    <td style="background:linear-gradient(180deg,#08142d 0%,#142f78 100%);padding:28px 32px;">
+                        <div style="font-size:28px;font-weight:800;letter-spacing:0.02em;color:#ffffff;">GASFLOW</div>
+                        <div style="font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#34d399;margin-top:6px;">
+                            Inteligencia de Compras
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:32px;">
+                        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:#10b981;margin-bottom:12px;"
+                             th:text="${subtitulo}">Atualizacao importante</div>
+                        <h1 style="margin:0 0 14px 0;font-size:28px;line-height:1.2;color:#0f172a;" th:text="${titulo}">
+                            Processo atualizado
+                        </h1>
+                        <p style="margin:0 0 20px 0;font-size:15px;line-height:1.8;color:#475569;">
+                            Ola,
+                            <strong th:text="${destinatario.nome}">Usuario</strong>.
+                        </p>
+                        <p style="margin:0 0 24px 0;font-size:15px;line-height:1.8;color:#475569;" th:text="${mensagem}">
+                            Houve uma movimentacao importante no processo.
+                        </p>
+
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:22px;padding:20px 22px;margin-bottom:26px;">
+                            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">
+                                Processo
+                            </div>
+                            <div style="font-size:22px;font-weight:800;color:#0f172a;" th:text="${processo.identificador}">
+                                PROC-00000000
+                            </div>
+                            <div style="font-size:14px;color:#475569;margin-top:8px;" th:text="${processo.titulo}">
+                                Titulo do processo
+                            </div>
+                        </div>
+
+                        <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:26px;">
+                            <tr>
+                                <td style="border-radius:16px;background:#15307c;">
+                                    <a th:href="${linkProcesso}"
+                                       style="display:inline-block;padding:14px 22px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">
+                                        Abrir processo no GasFlow
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="font-size:13px;line-height:1.8;color:#64748b;">
+                            Acesse o GasFlow para acompanhar os detalhes e tomar as acoes necessarias.
+                        </div>
+                        <div style="font-size:12px;line-height:1.8;color:#94a3b8;margin-top:14px;">
+                            Se o botao acima nao abrir, copie este link no navegador:
+                            <span th:text="${linkProcesso}">http://localhost:8080/processos/1</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

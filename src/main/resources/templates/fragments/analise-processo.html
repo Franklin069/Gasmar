@@ -1,0 +1,177 @@
+<div th:fragment="conteudo">
+
+    <div class="mb-4">
+        <h4 class="text-sm font-extrabold text-slate-800 tracking-tight">
+            Análise e Condução da Compra
+        </h4>
+        <p class="text-[10px] text-slate-500 mt-1 font-medium italic">
+            Classifique o processo e defina os encaminhamentos
+        </p>
+    </div>
+
+    <hr class="border-slate-100 mb-5">
+
+    <form id="gerafForm"
+          th:action="@{/processos/{id}/conduzir(id=${processo.id})}"
+          method="POST"
+          enctype="multipart/form-data"
+          class="space-y-5">
+
+        <input type="hidden" name="solicitarAdiantamento" id="adiantamentoInput">
+
+        <div>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Valor Total do Processo
+            </label>
+            <input type="text" name="valorTotal" placeholder="Ex: 12.000,00" class="w-full p-2 border rounded-xl text-sm" required>
+        </div>
+
+        <div>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Tipo de Aquisição
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoAquisicao" value="CPV" required>
+                    <span class="ml-2 text-xs font-bold text-slate-700">CPV</span>
+                </label>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoAquisicao" value="CONTRATO" required>
+                    <span class="ml-2 text-xs font-bold text-slate-700">Contrato</span>
+                </label>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Natureza do Processo
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoProcesso" value="COMPRA_BEM" required>
+                    <span class="ml-2 text-xs font-bold text-slate-700">Compra de Bem</span>
+                </label>
+                <label class="flex items-center p-3 border-2 rounded-xl cursor-pointer">
+                    <input type="radio" name="tipoProcesso" value="CONTRATACAO_SERVICO" required>
+                    <span class="ml-2 text-xs font-bold text-slate-700">Contratação de Serviço</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="fiscal-field" class="hidden">
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Definir Fiscal
+            </label>
+            <select name="fiscalId" class="w-full p-2 border rounded-xl text-sm text-slate-700">
+                <option value="">Selecione...</option>
+                <option th:each="usuario : ${usuarios}"
+                        th:value="${usuario.id}"
+                        th:text="${usuario.nome}">
+                </option>
+            </select>
+        </div>
+
+        <div id="autorizacao-field">
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-2">
+                Autorização
+            </label>
+            <input type="file" name="autorizacaoCompra" class="w-full p-2 border rounded-xl text-xs text-slate-600">
+        </div>
+
+        <div class="flex gap-3 mt-4">
+            <button type="button"
+                    onclick="abrirModalInconformidade()"
+                    class="flex-1 border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all rounded-xl py-2.5 flex items-center justify-center">
+                <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
+            </button>
+
+            <button type="button"
+                    onclick="abrirModalConfirmacaoGeraf()"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold shadow-md shadow-emerald-200 transition-all rounded-xl py-2.5">
+                Conduzir
+            </button>
+        </div>
+
+    </form>
+
+    <div id="modalConfirmacaoGeraf"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Confirmar Condução
+            </h2>
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                Você deseja confirmar a classificação e prosseguir?
+            </p>
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" onclick="fecharModalConfirmacaoGeraf()"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" onclick="abrirModalAdiantamento()"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAdiantamento"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Solicitar Adiantamento?
+            </h2>
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                O processo requer um adiantamento de pagamento?
+            </p>
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" onclick="enviarComAdiantamento(false)"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Não
+                </button>
+                <button type="button" onclick="enviarComAdiantamento(true)"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Sim
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // -- Controle de Interface --
+        const radios = document.querySelectorAll('input[name="tipoAquisicao"]');
+        const fiscalField = document.getElementById('fiscal-field');
+        const autorizacaoField = document.getElementById('autorizacao-field');
+
+        radios.forEach(r => {
+            r.addEventListener('change', function () {
+                if (this.value === 'CONTRATO') {
+                    fiscalField.classList.remove('hidden');
+                    autorizacaoField.classList.add('hidden');
+                } else {
+                    fiscalField.classList.add('hidden');
+                    autorizacaoField.classList.remove('hidden');
+                }
+            });
+        });
+
+        function abrirModalConfirmacaoGeraf() {
+            if(document.getElementById("gerafForm").reportValidity()){
+                document.getElementById("modalConfirmacaoGeraf").classList.remove("hidden");
+                document.getElementById("modalConfirmacaoGeraf").classList.add("flex");
+            }
+        }
+
+        function fecharModalConfirmacaoGeraf() {
+            document.getElementById("modalConfirmacaoGeraf").classList.add("hidden");
+            document.getElementById("modalConfirmacaoGeraf").classList.remove("flex");
+        }
+
+        function enviarComAdiantamento(valor) {
+            document.getElementById("adiantamentoInput").value = valor;
+            document.getElementById("gerafForm").submit();
+        }
+    </script>
+
+</div>

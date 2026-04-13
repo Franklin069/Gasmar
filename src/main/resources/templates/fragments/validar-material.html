@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conteudo">
+
+    <form th:action="@{/processos/validar-material}"
+          method="post"
+          enctype="multipart/form-data"
+          id="formValidarMaterial"
+          class="space-y-6">
+
+        <input type="hidden" name="processoId" th:value="${processo.id}" />
+        <input type="hidden" name="acao" id="acaoValidarMaterial" value="aprovar" />
+        <input type="hidden" name="motivo" id="motivoValidarMaterial" />
+
+        <div>
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+                Validação do Material Entregue
+            </h3>
+            <p class="text-xs text-slate-500 mt-1 font-medium">
+                Confirme se o bem foi recebido conforme e registre fotos
+            </p>
+        </div>
+
+        <div>
+            <div onclick="document.getElementById('fotos_material').click()"
+                 class="border-2 border-dashed border-slate-300 bg-white rounded-xl p-6 text-center cursor-pointer hover:border-slate-400 transition">
+
+                <i class="bi bi-camera text-2xl text-slate-500 block mb-2"></i>
+
+                <p class="text-sm font-semibold text-slate-600">
+                    Clique para anexar fotos
+                </p>
+
+                <p id="nomeFotos" class="text-xs text-slate-400 mt-1">
+                    Selecione uma ou mais imagens (PNG, JPG)
+                </p>
+
+                <input type="file"
+                       id="fotos_material"
+                       name="fotos"
+                       accept="image/*"
+                       multiple
+                       required
+                       class="hidden"
+                       onchange="updateFileName(this, 'nomeFotos')">
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-3">
+
+            <button type="button" onclick="abrirModalInconformidade('validarMaterial')"
+                    class="flex-1 px-5 py-2.5 rounded-xl border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center">
+                <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
+            </button>
+
+            <button type="submit"
+                    onclick="document.getElementById('acaoValidarMaterial').value='aprovar'"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow flex items-center justify-center">
+                <i class="bi bi-check-circle mr-2"></i>
+                Confirmar Recebimento
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

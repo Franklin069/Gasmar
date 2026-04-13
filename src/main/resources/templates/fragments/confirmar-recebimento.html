@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conteudo">
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+
+        <h4 class="text-sm font-extrabold text-slate-800 tracking-tight"
+            th:text="${processo.tipoProcesso.name() == 'COMPRA_BEM'}
+                ? 'Aguardando Confirmação de Chegada'
+                : 'Aguardando Confirmação de Execução'">
+        </h4>
+
+        <p class="text-[10px] text-slate-500 mt-1 font-medium"
+           th:text="${processo.tipoProcesso.name() == 'COMPRA_BEM'}
+                ? 'Confirme se o bem foi recebido.'
+                : 'Confirme se o serviço foi executado.'">
+        </p>
+
+        <hr class="border-slate-100 my-5">
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onclick="abrirModalConfirmacao()"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] px-6 py-2.5 rounded-xl font-bold shadow-md shadow-emerald-200/50 transition-all hover:scale-[1.02] flex items-center gap-2">
+                <i class="bi bi-check-circle-fill text-sm"></i>
+                Confirmar
+            </button>
+
+            <button type="button"
+                    onclick="abrirModalInconformidade()"
+                    class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] px-6 py-2.5 rounded-xl font-bold border border-rose-200 transition-all hover:scale-[1.02] flex items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill text-sm"></i>
+                Reportar Inconformidade
+            </button>
+        </div>
+    </div>
+
+    <div id="modalConfirmacao"
+         class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center">
+
+        <div id="modalContent"
+             class="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-300">
+
+            <h2 class="text-base font-extrabold text-slate-800 mb-2"
+                th:text="${processo.tipoProcesso.name() == 'COMPRA_BEM'}
+                    ? 'Confirmar Recebimento'
+                    : 'Confirmar Execução'">
+            </h2>
+
+            <p class="text-xs text-slate-500 mb-6 font-medium leading-relaxed px-2"
+               th:text="${processo.tipoProcesso.name() == 'COMPRA_BEM'}
+                    ? 'Você confirma que o material foi recebido?'
+                    : 'Você atesta que o serviço foi executado?'">
+            </p>
+
+            <form th:action="@{/processos/confirmar-execucao}" method="post">
+
+                <input type="hidden" name="processoId" th:value="${processo.id}" />
+
+                <div class="flex justify-center space-x-3">
+
+                    <button type="button"
+                            onclick="fecharModalConfirmacao()"
+                            class="px-5 py-2 text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            id="btnConfirmar"
+                            class="px-5 py-2 bg-emerald-500 text-white text-[11px] font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 flex items-center justify-center min-w-[100px]">
+                        Confirmar
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

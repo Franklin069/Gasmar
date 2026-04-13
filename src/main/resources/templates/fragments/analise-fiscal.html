@@ -1,0 +1,84 @@
+<div th:fragment="conteudo">
+
+    <div class="mb-4">
+        <h4 class="text-sm font-extrabold text-slate-800">
+            Análise do Fiscal
+        </h4>
+        <p class="text-xs text-slate-500">
+            Anexe a autorização e finalize o processo
+        </p>
+    </div>
+
+    <form id="fiscalForm"
+          th:action="@{/processos/{id}/analise-fiscal(id=${processo.id})}"
+          method="POST"
+          enctype="multipart/form-data">
+
+        <input type="hidden" name="solicitarAdiantamento" id="adiantamentoFiscal">
+
+        <div>
+            <label class="text-xs font-bold text-slate-600 uppercase">Autorização</label>
+            <input type="file" name="autorizacaoCompra" class="w-full mt-2 p-2 border border-slate-200 rounded-xl text-xs text-slate-600" required>
+        </div>
+
+        <div class="flex gap-3 mt-4">
+            <button type="button"
+                    onclick="abrirModalInconformidade()"
+                    class="flex-1 border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all rounded-xl py-2.5 flex justify-center items-center">
+                <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
+            </button>
+
+            <button type="button"
+                    onclick="abrirModalConfirmacaoFiscal()"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold shadow-md shadow-emerald-200 transition-all rounded-xl py-2.5">
+                Finalizar
+            </button>
+        </div>
+
+    </form>
+
+    <div id="modalConfirmacaoFiscal"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Confirmar Envio
+            </h2>
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                Você deseja realmente finalizar a análise deste processo?
+            </p>
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" onclick="fecharModalConfirmacaoFiscal()"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" onclick="abrirModalAdiantamentoFiscal()"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAdiantamentoFiscal"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Solicitar Adiantamento?
+            </h2>
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                O processo requer um adiantamento de pagamento?
+            </p>
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" onclick="enviarFiscal(false)"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Não
+                </button>
+                <button type="button" onclick="enviarFiscal(true)"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Sim
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

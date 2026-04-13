@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conteudo">
+
+    <div class="grid grid-cols-3 gap-6 opacity-90">
+
+        <div class="p-4">
+            <p class="text-[10px] text-slate-400 uppercase">Valor Total do Contrato</p>
+            <p class="text-sm font-bold text-slate-600"
+               th:text="'R$ ' + ${#numbers.formatDecimal(processo.valorTotal, 1, 'POINT', 2, 'COMMA')}">
+            </p>
+        </div>
+
+        <div class="p-4 border-l border-slate-200">
+            <p class="text-[10px] text-slate-400 uppercase">Já Pago</p>
+            <p class="text-sm font-bold text-slate-600"
+               th:text="'R$ ' + ${#numbers.formatDecimal(valorPago, 1, 'POINT', 2, 'COMMA')}">
+            </p>
+        </div>
+
+        <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+            <p class="text-[11px] text-emerald-600 uppercase font-bold">
+                A Pagar Nesta Solicitação
+            </p>
+
+            <p class="text-lg font-extrabold text-emerald-700 mt-1"
+               th:text="'R$ ' + ${#numbers.formatDecimal(valorSolicitado, 1, 'POINT', 2, 'COMMA')}">
+            </p>
+
+            <div class="mt-2 flex items-center space-x-2"
+                 th:if="${adiantamento}">
+                <i class="bi bi-check-square-fill text-emerald-500"></i>
+                <span class="text-[9px] font-semibold text-emerald-800 uppercase">
+                Referente a Adiantamento
+            </span>
+            </div>
+        </div>
+    </div>
+
+    <form th:action="@{/processos/aprovar-pagamento}" method="post">
+
+        <input type="hidden" name="processoId" th:value="${processo.id}" />
+        <input type="hidden" name="pagamentoId" th:value="${pagamentoId}" />
+
+        <div class="flex flex-col md:flex-row justify-end space-y-3 md:space-y-0 md:space-x-4 pt-4">
+
+            <button type="button" onclick="abrirModalInconformidade()"
+                    class="flex-1 px-5 py-2.5 rounded-xl border-2 border-rose-100 text-rose-600 text-[11px] font-bold hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center">
+                <i class="bi bi-exclamation-triangle mr-2"></i> Reportar Inconformidade
+            </button>
+
+            <button type="button"
+                    onclick="confirmarAprovacao()"
+                    class="px-6 py-2 bg-emerald-500 text-white rounded-lg font-bold hover:bg-emerald-600 shadow-md shadow-emerald-200 hover:scale-105 transition-all flex items-center justify-center flex-1 md:flex-none text-sm">
+                <i class="bi bi-check-circle-fill mr-2"></i>
+                Aprovar Pagamento
+            </button>
+
+        </div>
+    </form>
+
+    <div id="modalConfirmacao"
+         class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 transition-opacity">
+
+        <div class="bg-white rounded-[20px] p-8 w-[340px] shadow-2xl text-center transform transition-transform scale-100">
+
+            <h2 class="text-base font-extrabold text-slate-800 mb-2">
+                Confirmar Aprovação
+            </h2>
+
+            <p class="text-xs text-slate-500 mb-6 font-medium px-2">
+                Você deseja realmente aprovar esse pagamento?
+            </p>
+
+            <div class="flex items-center justify-center space-x-3">
+
+                <button onclick="fecharModal()"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+
+                <button onclick="enviarAprovacao()"
+                        class="px-5 py-2.5 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors">
+                    Confirmar
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
