@@ -23,11 +23,10 @@
 
 <div class="max-w-5xl mx-auto">
 
-    <!-- TOPO -->
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-800">Detalhe do Processo</h1>
-            <p class="text-sm text-slate-500">Visualização completa do fluxo do processo</p>
+            <p class="text-sm text-slate-500">Visualizacao completa do fluxo do processo</p>
         </div>
 
         <a th:href="@{/processos}"
@@ -36,7 +35,6 @@
         </a>
     </div>
 
-    <!-- CARD PRINCIPAL -->
     <section class="card-soft p-8 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -51,7 +49,7 @@
             </div>
 
             <div>
-                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Título</p>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Titulo</p>
                 <p class="text-lg font-semibold text-slate-800" th:text="${processo.titulo}">Compra de materiais</p>
             </div>
 
@@ -69,37 +67,80 @@
             </div>
 
             <div>
-                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Aquisição</p>
+                <p class="text-xs font-bold uppercase text-slate-400 mb-2">Tipo de Aquisicao</p>
                 <p class="text-lg font-semibold text-slate-800" th:text="${processo.tipoAquisicao}">CPV</p>
             </div>
 
             <div>
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Demandante</p>
                 <p class="text-lg font-semibold text-slate-800"
-                   th:text="${processo.setorDemandante != null ? processo.setorDemandante.nome : 'Não informado'}">
-                    Usuário
+                   th:text="${processo.setorDemandante != null ? processo.setorDemandante.nome : 'Nao informado'}">
+                    Usuario
                 </p>
             </div>
 
             <div>
                 <p class="text-xs font-bold uppercase text-slate-400 mb-2">Fiscal</p>
                 <p class="text-lg font-semibold text-slate-800"
-                   th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Não definido'}">
-                    Não definido
+                   th:text="${processo.fiscal != null ? processo.fiscal.nome : 'Nao definido'}">
+                    Nao definido
                 </p>
             </div>
 
         </div>
     </section>
 
-    <!-- AÇÕES DO FLUXO -->
+    <section class="card-soft p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800 mb-1">Documentos do Processo</h2>
+                <p class="text-sm text-slate-500">Visualize ou baixe os arquivos anexados</p>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wide text-slate-400"
+                  th:text="${#lists.size(documentos) + ' arquivo(s)'}">0 arquivo(s)</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(documentos)}"
+             class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-sm text-slate-500">
+            Nenhum documento foi anexado a este processo ate o momento.
+        </div>
+
+        <div th:if="${!#lists.isEmpty(documentos)}" class="space-y-4">
+            <div th:each="documento : ${documentos}"
+                 class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-emerald-600"
+                       th:text="${documento.tipo}">PABS</p>
+                    <p class="text-base font-semibold text-slate-800 break-all"
+                       th:text="${documento.nomeArquivo}">arquivo.pdf</p>
+                    <p class="text-sm text-slate-500"
+                       th:text="'Enviado em ' + ${#temporals.format(documento.dataUpload, 'dd/MM/yyyy HH:mm')}">
+                        Enviado em 01/01/2026 10:00
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <a th:href="@{/processos/{processoId}/documentos/{documentoId}/visualizar(processoId=${processo.id},documentoId=${documento.id})}"
+                       target="_blank"
+                       class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-sm">
+                        Visualizar
+                    </a>
+
+                    <a th:href="@{/processos/{processoId}/documentos/{documentoId}/download(processoId=${processo.id},documentoId=${documento.id})}"
+                       class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl text-sm">
+                        Baixar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="card-soft p-8">
-        <h2 class="text-xl font-extrabold text-slate-800 mb-6">Ações Disponíveis</h2>
+        <h2 class="text-xl font-extrabold text-slate-800 mb-6">Acoes Disponiveis</h2>
 
         <div class="flex flex-wrap gap-4">
 
-            <!-- GERAF AUTORIZA COMPRA -->
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
                   th:action="@{/processos/{id}/autorizar(id=${processo.id})}"
                   method="post">
@@ -109,8 +150,7 @@
                 </button>
             </form>
 
-            <!-- GESTOR APROVA PAGAMENTO -->
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA}"
                   th:action="@{/processos/{id}/aprovar-pagamento(id=${processo.id})}"
                   method="post">
@@ -120,7 +160,6 @@
                 </button>
             </form>
 
-            <!-- REGISTRAR PAGAMENTO -->
             <form th:if="${processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO}"
                   th:action="@{/processos/{id}/registrar-pagamento(id=${processo.id})}"
                   method="post">
@@ -130,8 +169,7 @@
                 </button>
             </form>
 
-            <!-- DEMANDANTE REGISTRA RECEBIMENTO -->
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
                   th:action="@{/processos/{id}/receber-conforme(id=${processo.id})}"
                   method="post">
@@ -141,18 +179,17 @@
                 </button>
             </form>
 
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).PAGO}"
                   th:action="@{/processos/{id}/receber-nao-conforme(id=${processo.id})}"
                   method="post">
                 <button type="submit"
                         class="bg-red-500 hover:bg-red-600 text-white font-bold px-5 py-3 rounded-xl">
-                    Receber Não Conforme
+                    Receber Nao Conforme
                 </button>
             </form>
 
-            <!-- GECONT VALIDA NF -->
-            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME}"
                   th:action="@{/processos/{id}/validar-nf(id=${processo.id})}"
                   method="post">
@@ -164,18 +201,17 @@
 
         </div>
 
-        <!-- MENSAGEM CASO NÃO HAJA AÇÃO -->
-        <div th:if="${(usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF 
+        <div th:if="${(usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
                       or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR 
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR
                       or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA)
                      and (processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_PAGAMENTO)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE 
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).DEMANDANTE
                       or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).PAGO)
-                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT 
+                     and (usuarioLogado.perfil != T(com.gasflow.gasflow.enums.PerfilUsuario).GECONT
                       or processo.estadoAtual != T(com.gasflow.gasflow.enums.StatusProcesso).RECEBIDO_CONFORME)}"
              class="mt-6 text-slate-400 text-sm">
-            Nenhuma ação disponível para este perfil no estado atual do processo.
+            Nenhuma acao disponivel para este perfil no estado atual do processo.
         </div>
 
     </section>

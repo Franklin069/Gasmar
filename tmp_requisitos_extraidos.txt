@@ -1,0 +1,165 @@
+=== PAGINA 1 ===
+Especificação de Requisitos – Sistema GasFlow (MVP)
+Portal Centralizado de Compras, Recebimento e Controle de Materiais
+1. Visão Geral do Sistema
+O GasFlow é um sistema web corporativo destinado a centralizar, rastrear e dar transparência a todo o processo de aquisição de bens e serviços, desde a abertura da demanda pela Área Demandante até a validação contábil, pagamento e encerramento do processo.
+O sistema tem como objetivos principais:
+● Eliminar controles manuais, descentralizados e redundantes;
+● Reduzir retrabalho e troca informal de informações entre setores;
+● Garantir rastreabilidade completa de documentos, decisões e responsabilidades;
+● Oferecer uma visão única e compartilhada do processo para todos os setores envolvidos.
+2. Requisitos Funcionais (RF)
+Os requisitos funcionais descrevem o que o sistema deve fazer, refletindo fielmente as regras de negócio e o fluxo institucional do processo de compras, conforme o fluxograma validado.
+2.1 Abertura e Identificação do Processo
+RF.01 – Registro de Processo de Compra  O sistema deve permitir que a Área Demandante inicie um novo processo de compra, gerando automaticamente um ID único, sequencial e imutável, que será utilizado como identificador principal do processo.
+=== PAGINA 2 ===
+RF.02 – Upload Obrigatório da PABS
+No momento da criação do processo, o sistema deve exigir o upload obrigatório da
+PABS (Proposição de Aquisição de Bens e Serviços) em formato PDF, impedindo o
+avanço do fluxo sem esse documento.
+RF.03 – Documentação Técnica Complementar
+O sistema deve permitir o upload opcional de documentos complementares, como
+Memorial Descritivo, Mapa de Cotação e Propostas, vinculando-os ao processo de
+compra.
+RF.04 – Estado Inicial do Processo
+Após a abertura, o processo deve ser automaticamente definido no estado
+“Aguardando Análise do GERAF”.
+2.2 Análise e Condução da Compra (GERAF)
+RF.05 – Definição do Tipo de Aquisição (Rito)
+O sistema deve exigir que o setor de compras (GERAF) classifique formalmente o
+processo como Compra de Pequeno Vulto (CPV) ou Contrato, condicionando as
+ações subsequentes a essa definição.
+RF.06 – Registro de Fornecedor e Valor Negociado
+O sistema deve permitir o registro do fornecedor selecionado, contendo, no mínimo,
+nome/razão social, CNPJ e valor final negociado, mantendo essas informações
+visíveis para os demais setores envolvidos.
+RF.07 – Indicação de Fiscal de Contrato
+Quando o processo for classificado como Contrato, o sistema deve exigir a
+indicação de um Fiscal de Contrato, seja pelo GERAF ou pela Área Demandante,
+bloqueando a continuidade do fluxo até que essa definição seja realizada.
+RF.08 – Emissão da Autorização de Compra
+O sistema deve permitir a emissão da Autorização de Compra pelo GERAF (em
+CPV) ou pelo Fiscal de Contrato (em contratos).
+2.3 Pagamento e Adiantamento
+RF.09 – Solicitação de Pagamento
+O sistema deve permitir a solicitação de pagamento, identificando se o pagamento
+é com adiantamento ou sem adiantamento, registrando valor e data da solicitação.
+=== PAGINA 3 ===
+RF.10 – Aprovação de Pagamento pelo Gestor Responsável
+Toda solicitação de pagamento deve ser submetida à aprovação de um Gestor
+Responsável, definido conforme o tipo de aquisição (GERAF ou Fiscal de Contrato).
+O gestor deve visualizar, no mínimo:
+● Valor solicitado;
+● Tipo de aquisição;
+● Documentos vinculados ao processo;
+● Situação atual do processo.
+RF.11 – Execução e Registro do Pagamento
+Após a aprovação, o sistema deve permitir que a GERAF/Financeiro execute o
+pagamento, registrando:
+● Data do pagamento;
+● Status (pago / não pago);
+● Upload do comprovante de pagamento, quando aplicável.
+2.4 Recebimento do Material (Área Demandante)
+RF.12 – Registro de Recebimento do Bem
+O sistema deve permitir que a Área Demandante registre o recebimento do
+material, indicando se o recebimento ocorreu de forma conforme ou não conforme.
+RF.13 – Evidência do Estado do Material
+O sistema deve permitir o upload de arquivos de imagem (JPEG ou PNG) como
+evidência do estado do material recebido, vinculando essas evidências ao processo.
+RF.14 – Registro de Não Conformidade
+Caso o recebimento seja marcado como não conforme, o sistema deve exigir:
+● Descrição detalhada do problema identificado;
+● Registro da decisão adotada (troca ou devolução).
+O sistema não automatiza essas tratativas no MVP, mantendo apenas o registro e a
+rastreabilidade das decisões.
+2.5 Nota Fiscal e Validação Contábil (GECONT)
+RF.15 – Vínculo e Validação da Nota Fiscal
+O sistema deve permitir que o GECONT valide a Nota Fiscal (NF), verificando a
+conformidade dos valores, dados do fornecedor e vínculo com o processo.
+=== PAGINA 4 ===
+Caso o valor da NF apresente divergência significativa em relação à PABS ou ao
+valor negociado, o sistema deve:
+● Bloquear o avanço do processo;
+● Exigir o registro de uma justificativa formal.
+RF.16 – Resumo do Processo para Validação da Nota Fiscal
+No momento da validação da Nota Fiscal, o sistema deve gerar automaticamente
+um Resumo do Processo, contendo:
+● Identificação do processo;
+● Área Demandante;
+● Tipo de aquisição;
+● Fornecedor e valores;
+● Situação do pagamento;
+● Situação do recebimento;
+● Histórico resumido de decisões.
+A validação da NF deve considerar obrigatoriamente esse resumo.
+2.6 Resumos e Consolidação do Processo
+RF.17 – Resumo Dinâmico do Processo
+O sistema deve manter um Resumo do Processo sempre disponível e visível a
+todos os setores, sendo atualizado automaticamente a cada mudança relevante no
+fluxo.
+RF.18 – Resumo Final do Processo
+Ao encerrar o processo, o sistema deve gerar um Resumo Final, consolidando:
+● Linha do tempo completa do processo;
+● Documentos anexados;
+● Decisões registradas;
+● Pagamentos realizados;
+● Resultado do recebimento do material.
+Esse resumo deve permanecer disponível para consulta, auditoria e relatórios.
+2.7 Estados e Controle do Fluxo do Processo
+RF.19 – Estados do Processo de Compra
+O sistema deve controlar o processo de compra por meio de estados formaais,
+incluindo, no mínimo:
+=== PAGINA 5 ===
+● Aberto;
+● Aguardando Análise do GERAF;
+● Autorização Emitida;
+● Aguardando Pagamento;
+● Pago;
+● Aguardando Recebimento;
+● Recebido Conforme;
+● Recebido Não Conforme;
+● Nota Fiscal Validada;
+● Encerrado.
+RF.20 – Controle de Transições entre Estados
+O sistema deve permitir a mudança de estado apenas quando os pré-requisitos da
+etapa anterior forem atendidos, respeitando o fluxo institucional e as permissões de
+cada setor.
+3. Requisitos Não Funcionais (RNF)
+RNF.01 – Armazenamento Híbrido de Arquivos
+O sistema deve armazenar no banco de dados apenas os metadados e o caminho
+dos arquivos, enquanto os arquivos físicos permanecem no sistema de arquivos do
+servidor.
+RNF.02 – Controle de Acesso por Setor
+O sistema deve utilizar autenticação por usuário, com permissões baseadas no
+setor ao qual o usuário pertence, habilitando ou desabilitando ações e
+funcionalidades conforme o perfil.
+RNF.03 – Visualização Integrada de Documentos
+Os documentos PDF anexados devem ser exibidos em um visualizador integrado
+ao sistema, evitando downloads automáticos e garantindo maior controle da
+informação.
+RNF.04 – Auditoria e Rastreabilidade
+Toda alteração relevante no processo deve ser registrada, armazenando:
+● Usuário responsável;
+● Data e hora da alteração;
+● Estado anterior e novo estado.
+RNF.05 – Validação de Arquivos
+O sistema deve validar o tipo e o tamanho máximo dos arquivos anexados,
+garantindo desempenho, segurança e estabilidade.
+=== PAGINA 6 ===
+4. Detalhamento do Fluxo Visual (Dashboard)
+Filtro por Setor
+● A Área Demandante visualiza apenas seus próprios processos;
+● GERAF e GECONT visualizam todos os processos.
+Linha do Tempo do Processo
+O sistema deve exibir uma linha do tempo visual com todas as etapas do processo,
+indicando:
+● Etapas concluídas em destaque;
+● Etapas pendentes;
+● Alertas visuais em casos de bloqueio ou atraso, especialmente na validação
+da Nota Fiscal.
+Área de Anexos
+O sistema deve apresentar uma área de anexos em formato de grid, exibindo para
+cada documento:
+● Tipo do documento;
+● Data do upload;
+● Usuário responsável pelo envio.
