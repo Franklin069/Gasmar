@@ -17,9 +17,6 @@ public class RegistroEntrega {
     @Column(name = "data_registro", nullable = false)
     private LocalDateTime dataRegistro;
 
-    @Column(name = "nome_recebedor", nullable = false, length = 150)
-    private String nomeRecebedor;
-
     @ManyToOne
     @JoinColumn(name = "processo_id", nullable = false)
     private Processo processo;

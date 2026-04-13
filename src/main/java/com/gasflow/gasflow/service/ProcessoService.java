@@ -2,16 +2,15 @@ package com.gasflow.gasflow.service;
 
 import com.gasflow.gasflow.dto.AcaoProcessoDTO;
 import com.gasflow.gasflow.enums.*;
-import com.gasflow.gasflow.model.HistoricoProcesso;
-import com.gasflow.gasflow.model.Pagamento;
-import com.gasflow.gasflow.model.Processo;
-import com.gasflow.gasflow.model.Usuario;
+import com.gasflow.gasflow.model.*;
 import com.gasflow.gasflow.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,13 +21,16 @@ public class ProcessoService {
     private final UsuarioRepository usuarioRepository;
     private final PagamentoRepository pagamentoRepository;
     private final HistoricoProcessoRepository historicoProcessoRepositoryRepository;
+    private final PagamentoService pagamentoService;
+    private final RegistroEntregaRepository registroEntregaRepository;
 
-
-    public ProcessoService(ProcessoRepository processoRepository, UsuarioRepository usuarioRepository, PagamentoRepository pagamentoRepository, HistoricoProcessoRepository historicoProcessoRepositoryRepository) {
+    public ProcessoService(ProcessoRepository processoRepository, UsuarioRepository usuarioRepository, PagamentoRepository pagamentoRepository, HistoricoProcessoRepository historicoProcessoRepositoryRepository, PagamentoService pagamentoService, RegistroEntregaRepository registroEntregaRepository) {
         this.processoRepository = processoRepository;
         this.usuarioRepository = usuarioRepository;
         this.pagamentoRepository = pagamentoRepository;
         this.historicoProcessoRepositoryRepository = historicoProcessoRepositoryRepository;
+        this.pagamentoService = pagamentoService;
+        this.registroEntregaRepository = registroEntregaRepository;
     }
 
     public Processo criarProcesso(Processo processo, Long usuarioId) {
@@ -55,16 +57,25 @@ public class ProcessoService {
         return "PROC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    public AcaoProcessoDTO resolverAcao(Processo processo, Usuario usuario) {
+    public List<AcaoProcessoDTO> resolverAcoes(Processo processo, Usuario usuario) {
+
+        List<AcaoProcessoDTO> acoes = new ArrayList<>();
 
         String setorUsuario = usuario.getSetor().getSigla();
         Cargo cargo = usuario.getCargo();
+
+        if (processo.getStatusGecont() != null &&
+                processo.getStatusGecont() == StatusGecont.AGUARDANDO_VALIDACAO &&
+                "GECONT".equalsIgnoreCase(setorUsuario)) {
+
+            acoes.add(new AcaoProcessoDTO("VALIDAR_NOTA_FISCAL"));
+        }
 
         switch (processo.getEstadoAtual()) {
 
             case AGUARDANDO_ANALISE:
                 if ("GERAF".equalsIgnoreCase(setorUsuario)) {
-                    return new AcaoProcessoDTO("ANALISE_PROCESSO");
+                    acoes.add(new AcaoProcessoDTO("ANALISE_PROCESSO"));
                 }
                 break;
 
@@ -72,20 +83,21 @@ public class ProcessoService {
                 if (processo.getFiscal() != null &&
                         processo.getFiscal().getId().equals(usuario.getId())) {
 
-                    return new AcaoProcessoDTO("CONFIRMAR_RECEBIMENTO");
+                    acoes.add(new AcaoProcessoDTO("CONFIRMAR_RECEBIMENTO"));
 
                 } else if (processo.getFiscal() == null &&
                         "GERAF".equalsIgnoreCase(setorUsuario)) {
 
-                    return new AcaoProcessoDTO("CONFIRMAR_RECEBIMENTO");
+                    acoes.add(new AcaoProcessoDTO("CONFIRMAR_RECEBIMENTO"));
                 }
                 break;
 
             case AGUARDANDO_VALIDACAO_MATERIAL:
-                if (processo.getSetorDemandante().getId().equals(usuario.getId()) &&
-                        processo.getTipoProcesso() == TipoProcesso.COMPRA_BEM) {
+                if (processo.getSetorDemandante().getSetor().getId()
+                        .equals(usuario.getSetor().getId())
+                        && processo.getTipoProcesso() == TipoProcesso.COMPRA_BEM) {
 
-                    return new AcaoProcessoDTO("VALIDAR_MATERIAL");
+                    acoes.add(new AcaoProcessoDTO("VALIDAR_MATERIAL"));
                 }
                 break;
 
@@ -93,12 +105,12 @@ public class ProcessoService {
                 if (processo.getFiscal() != null &&
                         processo.getFiscal().getId().equals(usuario.getId())) {
 
-                    return new AcaoProcessoDTO("SOLICITAR_PAGAMENTO");
+                    acoes.add(new AcaoProcessoDTO("SOLICITAR_PAGAMENTO"));
 
                 } else if (processo.getFiscal() == null &&
                         "GERAF".equalsIgnoreCase(setorUsuario)) {
 
-                    return new AcaoProcessoDTO("SOLICITAR_PAGAMENTO");
+                    acoes.add(new AcaoProcessoDTO("SOLICITAR_PAGAMENTO"));
                 }
                 break;
 
@@ -107,18 +119,18 @@ public class ProcessoService {
                         usuario.getSetor().getId().equals(
                                 processo.getSetorDemandante().getSetor().getId())) {
 
-                    return new AcaoProcessoDTO("APROVAR_PAGAMENTO");
+                    acoes.add(new AcaoProcessoDTO("APROVAR_PAGAMENTO"));
                 }
                 break;
 
             case AGUARDANDO_EFETUACAO_PAGAMENTO:
                 if ("GERAF".equalsIgnoreCase(setorUsuario)) {
-                    return new AcaoProcessoDTO("EXECUTAR_PAGAMENTO");
+                    acoes.add(new AcaoProcessoDTO("EXECUTAR_PAGAMENTO"));
                 }
                 break;
         }
 
-        return null;
+        return acoes;
     }
 
     @Transactional
@@ -132,7 +144,6 @@ public class ProcessoService {
         Processo processo = processoRepository.findById(processoId)
                 .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
 
-        // 🔹 Criar pagamento
         Pagamento pagamento = new Pagamento();
         pagamento.setProcesso(processo);
         pagamento.setSolicitadoPor(usuario);
@@ -148,13 +159,12 @@ public class ProcessoService {
 
         pagamentoRepository.save(pagamento);
 
-        // 🔹 Atualizar estado do processo
         StatusProcesso estadoAnterior = processo.getEstadoAtual();
 
         processo.setEstadoAtual(StatusProcesso.AGUARDANDO_AUTORIZACAO_PAGAMENTO);
+        processo.setStatusGecont(StatusGecont.AGUARDANDO_VALIDACAO);
         processoRepository.save(processo);
 
-        // 🔹 Histórico
         HistoricoProcesso historico = new HistoricoProcesso();
         historico.setEstadoAnterior(estadoAnterior);
         historico.setEstadoNovo(StatusProcesso.AGUARDANDO_AUTORIZACAO_PAGAMENTO);
@@ -196,6 +206,167 @@ public class ProcessoService {
         historicoProcessoRepositoryRepository.save(historico);
     }
 
+    @Transactional
+    public void executarPagamento(
+            Processo processo,
+            Pagamento pagamento,
+            Double valorPago,
+            Usuario usuario
+    ) {
 
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        pagamento.setStatus(StatusPagamento.PAGO);
+        pagamento.setValorPago(valorPago);
+        pagamento.setDataPagamento(LocalDate.now());
+
+        pagamentoRepository.save(pagamento);
+
+        Double valorTotal = processo.getValorTotal();
+        Double valorPagoTotal = pagamentoService.calcularValorPago(processo.getId());
+
+        Double restante = valorTotal - (valorPagoTotal != null ? valorPagoTotal : 0);
+
+        StatusProcesso novoEstado;
+
+        if (pagamento.getTipoPagamento() == TipoPagamento.ADIANTAMENTO) {
+            novoEstado = StatusProcesso.AGUARDANDO_RECEBIMENTO_EXECUCAO;
+
+        } else {
+
+            if (restante <= 0) {
+                novoEstado = StatusProcesso.ENCERRADO;
+
+            } else {
+                novoEstado = StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO;
+            }
+        }
+
+        processo.setEstadoAtual(novoEstado);
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(novoEstado);
+        historico.setDataTransicao(LocalDateTime.now());
+        String observacao;
+        if (novoEstado == StatusProcesso.ENCERRADO) {
+            observacao = "Processo encerrado após pagamento total";
+        } else if (pagamento.getTipoPagamento() == TipoPagamento.ADIANTAMENTO) {
+            observacao = "Pagamento de adiantamento realizado pela GERAF";
+        } else {
+            observacao = "Pagamento executado pela GERAF";
+        }
+        historico.setObservacao(observacao);
+        historico.setProcesso(processo);
+        historico.setUsuario(usuario);
+
+        historicoProcessoRepositoryRepository.save(historico);
+    }
+
+    @Transactional
+    public void confirmarExecucao(Long processoId, Usuario usuario) {
+
+        Processo processo = processoRepository.findById(processoId)
+                .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
+
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        RegistroEntrega registro = new RegistroEntrega();
+        registro.setProcesso(processo);
+        registro.setRegistradoPor(usuario);
+        registro.setDataRegistro(LocalDateTime.now());
+
+        registroEntregaRepository.save(registro);
+
+        StatusProcesso novoEstado;
+
+        if (processo.getTipoProcesso() == TipoProcesso.COMPRA_BEM) {
+            novoEstado = StatusProcesso.AGUARDANDO_VALIDACAO_MATERIAL;
+        } else {
+            novoEstado = StatusProcesso.AGUARDANDO_SOLICITACAO_PAGAMENTO;
+        }
+
+        processo.setEstadoAtual(novoEstado);
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(novoEstado);
+        historico.setDataTransicao(LocalDateTime.now());
+        if (processo.getTipoProcesso() == TipoProcesso.COMPRA_BEM) {
+            historico.setObservacao("Recebimento do material confirmado");
+        } else {
+            historico.setObservacao("Execução do serviço confirmada");
+        }
+        historico.setProcesso(processo);
+        historico.setUsuario(usuario);
+
+        historicoProcessoRepositoryRepository.save(historico);
+    }
+
+    @Transactional
+    public void validarNotaFiscalGecont(
+            Processo processo,
+            Usuario usuario,
+            String observacao
+    ) {
+
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        processo.setStatusGecont(StatusGecont.VALIDADO);
+
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setProcesso(processo);
+        historico.setUsuario(usuario);
+        historico.setDataTransicao(LocalDateTime.now());
+
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(processo.getEstadoAtual());
+
+        historico.setObservacao(
+                observacao != null && !observacao.isBlank()
+                        ? observacao
+                        : "Nota fiscal validada pela GECONT"
+        );
+
+        historicoProcessoRepositoryRepository.save(historico);
+    }
+
+    public void registrarInconformidade(Processo processo, Usuario usuario, String motivo) {
+
+        StatusProcesso estadoAnterior = processo.getEstadoAtual();
+
+        StatusProcesso novoEstado;
+
+        switch (estadoAnterior) {
+            case AGUARDANDO_VALIDACAO_MATERIAL:
+                novoEstado = StatusProcesso.RECEBIDO_NAO_CONFORME;
+                break;
+
+            case AGUARDANDO_AUTORIZACAO_PAGAMENTO:
+                novoEstado = StatusProcesso.SOLICITACAO_NAO_CONFORME;
+                break;
+
+            default:
+                novoEstado = StatusProcesso.NF_NAO_CONFORME;
+        }
+
+        processo.setEstadoAtual(novoEstado);
+        processoRepository.save(processo);
+
+        HistoricoProcesso historico = new HistoricoProcesso();
+        historico.setEstadoAnterior(estadoAnterior);
+        historico.setEstadoNovo(novoEstado);
+        historico.setProcesso(processo);
+        historico.setUsuario(usuario);
+        historico.setDataTransicao(LocalDateTime.now());
+        historico.setObservacao("Não conformidade registrada");
+        historico.setObservacaoInconforme(motivo);
+
+        historicoProcessoRepositoryRepository.save(historico);
+    }
 
 }

@@ -36,4 +36,7 @@ public class HistoricoProcesso {
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    @Column(name = "observacao_inconforme", columnDefinition = "TEXT")
+    private String observacaoInconforme;
 }
