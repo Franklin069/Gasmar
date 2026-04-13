@@ -25,6 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessoService {
@@ -90,14 +91,27 @@ public class ProcessoService {
     // LISTAGEM
     // =========================
     public List<Processo> listarTodos() {
-        return processoRepository.findAll();
+        return processoRepository.findAllByOrderByIdDesc();
     }
 
     public List<Processo> listarPorUsuario(Usuario usuario) {
         if (usuario.getPerfil() == PerfilUsuario.DEMANDANTE) {
-            return processoRepository.findBySetorDemandante(usuario);
+            return processoRepository.findBySetorDemandanteOrderByIdDesc(usuario);
         }
-        return processoRepository.findAll();
+        return processoRepository.findAllByOrderByIdDesc();
+    }
+
+    public List<Processo> listarComFiltros(Usuario usuario,
+                                           String busca,
+                                           StatusProcesso status,
+                                           com.gasflow.gasflow.enums.TipoProcesso tipoProcesso,
+                                           Long setorId) {
+        return listarPorUsuario(usuario).stream()
+                .filter(processo -> filtroBusca(processo, busca))
+                .filter(processo -> status == null || processo.getEstadoAtual() == status)
+                .filter(processo -> tipoProcesso == null || processo.getTipoProcesso() == tipoProcesso)
+                .filter(processo -> filtroSetor(usuario, processo, setorId))
+                .collect(Collectors.toList());
     }
 
     public Processo buscarPorId(Long id) {
@@ -137,6 +151,21 @@ public class ProcessoService {
         }
 
         processo.setEstadoAtual(StatusProcesso.AUTORIZACAO_EMITIDA);
+        processoRepository.save(processo);
+    }
+
+    public void rejeitarProcesso(Long processoId, Usuario usuario) {
+        Processo processo = buscarPorId(processoId);
+
+        if (usuario.getPerfil() != PerfilUsuario.GERAF) {
+            throw new RuntimeException("Sem permissao");
+        }
+
+        if (processo.getEstadoAtual() != StatusProcesso.AGUARDANDO_ANALISE_GERAF) {
+            throw new RuntimeException("Estado invalido");
+        }
+
+        processo.setEstadoAtual(StatusProcesso.REJEITADO);
         processoRepository.save(processo);
     }
 
@@ -210,6 +239,29 @@ public class ProcessoService {
     // =========================
     private String gerarIdentificador() {
         return "PROC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    private boolean filtroBusca(Processo processo, String busca) {
+        if (busca == null || busca.isBlank()) {
+            return true;
+        }
+
+        String termo = busca.trim().toLowerCase();
+        return processo.getTitulo().toLowerCase().contains(termo)
+                || processo.getIdentificador().toLowerCase().contains(termo)
+                || (processo.getSetorDemandante() != null
+                && processo.getSetorDemandante().getNome() != null
+                && processo.getSetorDemandante().getNome().toLowerCase().contains(termo));
+    }
+
+    private boolean filtroSetor(Usuario usuario, Processo processo, Long setorId) {
+        if (usuario.getPerfil() == PerfilUsuario.DEMANDANTE || setorId == null) {
+            return true;
+        }
+
+        return processo.getSetorDemandante() != null
+                && processo.getSetorDemandante().getSetor() != null
+                && setorId.equals(processo.getSetorDemandante().getSetor().getId());
     }
 
     private void salvarDocumento(Processo processo, Usuario usuario, MultipartFile arquivo, TipoDocumento tipoDocumento) {

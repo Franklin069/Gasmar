@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface ProcessoRepository extends JpaRepository<Processo, Long> {
 
-    List<Processo> findBySetorDemandante(Usuario usuario);
+    List<Processo> findAllByOrderByIdDesc();
+
+    List<Processo> findBySetorDemandanteOrderByIdDesc(Usuario usuario);
 
 }

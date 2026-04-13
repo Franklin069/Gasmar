@@ -150,6 +150,16 @@
                 </button>
             </form>
 
+            <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GERAF
+                         and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AGUARDANDO_ANALISE_GERAF}"
+                  th:action="@{/processos/{id}/rejeitar(id=${processo.id})}"
+                  method="post">
+                <button type="submit"
+                        class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-3 rounded-xl">
+                    Rejeitar Processo
+                </button>
+            </form>
+
             <form th:if="${usuarioLogado.perfil == T(com.gasflow.gasflow.enums.PerfilUsuario).GESTOR
                          and processo.estadoAtual == T(com.gasflow.gasflow.enums.StatusProcesso).AUTORIZACAO_EMITIDA}"
                   th:action="@{/processos/{id}/aprovar-pagamento(id=${processo.id})}"

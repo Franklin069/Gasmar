@@ -1,9 +1,12 @@
 package com.gasflow.gasflow.controller;
 
 import com.gasflow.gasflow.model.Documento;
+import com.gasflow.gasflow.enums.StatusProcesso;
+import com.gasflow.gasflow.enums.TipoProcesso;
 import com.gasflow.gasflow.enums.PerfilUsuario;
 import com.gasflow.gasflow.model.Processo;
 import com.gasflow.gasflow.model.Usuario;
+import com.gasflow.gasflow.repository.SetorRepository;
 import com.gasflow.gasflow.service.ProcessoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.core.io.Resource;
@@ -26,9 +29,11 @@ import java.nio.file.Paths;
 public class ProcessoController {
 
     private final ProcessoService processoService;
+    private final SetorRepository setorRepository;
 
-    public ProcessoController(ProcessoService processoService) {
+    public ProcessoController(ProcessoService processoService, SetorRepository setorRepository) {
         this.processoService = processoService;
+        this.setorRepository = setorRepository;
     }
 
     @GetMapping
@@ -43,6 +48,32 @@ public class ProcessoController {
         model.addAttribute("usuarioLogado", usuarioLogado);
 
         return "dashboard";
+    }
+
+    @GetMapping("/todos")
+    public String listarTodosProcessos(@RequestParam(required = false) String busca,
+                                       @RequestParam(required = false) StatusProcesso status,
+                                       @RequestParam(required = false) TipoProcesso tipoProcesso,
+                                       @RequestParam(required = false) Long setorId,
+                                       Model model,
+                                       HttpSession session) {
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("processos", processoService.listarComFiltros(usuarioLogado, busca, status, tipoProcesso, setorId));
+        model.addAttribute("usuarioLogado", usuarioLogado);
+        model.addAttribute("statusOptions", StatusProcesso.values());
+        model.addAttribute("tipoProcessoOptions", TipoProcesso.values());
+        model.addAttribute("setores", setorRepository.findAll());
+        model.addAttribute("busca", busca);
+        model.addAttribute("statusSelecionado", status);
+        model.addAttribute("tipoProcessoSelecionado", tipoProcesso);
+        model.addAttribute("setorSelecionado", setorId);
+
+        return "all-processes";
     }
 
     @GetMapping("/novo")
@@ -149,6 +180,18 @@ public class ProcessoController {
         }
 
         processoService.autorizarCompra(id, usuarioLogado);
+        return "redirect:/processos/" + id;
+    }
+
+    @PostMapping("/{id}/rejeitar")
+    public String rejeitarProcesso(@PathVariable Long id, HttpSession session) {
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            return "redirect:/";
+        }
+
+        processoService.rejeitarProcesso(id, usuarioLogado);
         return "redirect:/processos/" + id;
     }
 

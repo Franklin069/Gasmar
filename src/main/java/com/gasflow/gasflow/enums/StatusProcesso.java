@@ -4,6 +4,7 @@ public enum StatusProcesso {
 
     ABERTO,
     AGUARDANDO_ANALISE_GERAF,
+    REJEITADO,
     AUTORIZACAO_EMITIDA,
     AGUARDANDO_PAGAMENTO,
     PAGO,
