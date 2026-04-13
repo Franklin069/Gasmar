@@ -1,5 +1,6 @@
 package com.gasflow.gasflow.model;
 
+import com.gasflow.gasflow.enums.Cargo;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,5 +27,9 @@ public class Usuario {
 
     @ManyToOne
     @JoinColumn(name = "setor_id", nullable = false)
-    private Setor setor;    
+    private Setor setor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Cargo cargo;
 }

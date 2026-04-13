@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="modal(titulo, mensagem, protocolo, linkDestino)" th:if="${mensagem != null and !mensagem.isEmpty()}">
+
+    <div id="modalSucesso"
+         class="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center modal-content">
+
+            <div class="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mb-4 success-icon">
+                <i class="bi bi-check2-circle text-emerald-600 text-3xl"></i>
+            </div>
+
+            <h2 class="text-xl font-bold text-slate-800 mb-2"
+                th:text="${titulo}">
+            </h2>
+
+            <p class="text-xs text-slate-500 mb-6 leading-relaxed"
+               th:text="${mensagem}">
+            </p>
+
+            <div th:if="${protocolo != null}"
+                 class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-6">
+                <p class="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">
+                    Protocolo
+                </p>
+                <p class="text-base font-extrabold text-emerald-700 mt-0.5"
+                   th:text="${protocolo}">
+                </p>
+            </div>
+
+            <div class="flex justify-center space-x-2">
+
+                <button type="button"
+                        onclick="fecharModalSucesso()"
+                        class="px-6 py-3 text-slate-500 font-bold hover:text-slate-700 transition-colors">
+                    Fechar
+                </button>
+
+                <a th:href="@{${linkDestino}}"
+                   class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02]">
+                    Ir para Dashboard
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
